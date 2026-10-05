@@ -1,5 +1,6 @@
 package com.example.tambala.ui.pages
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,41 +27,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
-import com.example.tambala.ui.theme.GreenPrimary
+import com.example.tambala.ui.components.TopNavBar
+import com.example.tambala.ui.theme.Background
+import com.example.tambala.ui.theme.CardBorder
+import com.example.tambala.ui.theme.ExpenseRed
+import com.example.tambala.ui.theme.IncomeGreen
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
 @Composable
 fun AnalysisScreen() {
     Scaffold(
+        topBar = {
+            TopNavBar(
+                title = "Analysis",
+                subtitle = "Expense Overview"
+            )
+        },
         bottomBar = {
-            BottomNavBar(selectedIndex = 4)
+            BottomNavBar(selectedIndex = 3)
         }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FA))
+                .background(Background)
                 .padding(innerPadding)
         ) {
-            // Header
-            item {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Analysis",
-                        color = TextPrimary,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Expense Overview",
-                        color = TextSecondary,
-                        fontSize = 14.sp
-                    )
-                }
-            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
             // Summary Card
             item {
@@ -69,19 +63,21 @@ fun AnalysisScreen() {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    shape = RoundedCornerShape(16.dp)
+                    border = BorderStroke(1.dp, CardBorder),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+                    shape = RoundedCornerShape(20.dp)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text(
                             text = "TOTAL ANALYZED",
                             color = TextSecondary,
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "MK 95,800 spent",
-                            color = TextPrimary,
+                            color = ExpenseRed,
                             fontSize = 26.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -92,20 +88,22 @@ fun AnalysisScreen() {
                         ) {
                             Column {
                                 Text("Semester Inflow", color = TextSecondary, fontSize = 12.sp)
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     "+MK 450,000",
-                                    color = GreenPrimary,
+                                    color = IncomeGreen,
                                     fontSize = 15.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                             Column {
                                 Text("Net Remaining", color = TextSecondary, fontSize = 12.sp)
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     "MK 354,200",
                                     color = TextPrimary,
                                     fontSize = 15.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
@@ -121,7 +119,7 @@ fun AnalysisScreen() {
                     text = "Category Breakdown",
                     color = TextPrimary,
                     fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
@@ -152,7 +150,9 @@ fun BreakdownItem(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 5.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        border = BorderStroke(1.dp, CardBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier
@@ -188,7 +188,7 @@ fun BreakdownItem(
                 text = amount,
                 color = TextPrimary,
                 fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Bold
             )
         }
     }

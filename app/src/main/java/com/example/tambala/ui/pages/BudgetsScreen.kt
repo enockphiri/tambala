@@ -1,5 +1,6 @@
 package com.example.tambala.ui.pages
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,12 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsBus
-//import androidx.compose.material.icons.filled.Home
-//import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Restaurant
-//import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
@@ -30,7 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
 import com.example.tambala.ui.components.BudgetProgressItem
-//import com.example.tambala.ui.components.PrimaryButton
+import com.example.tambala.ui.components.TopNavBar
+import com.example.tambala.ui.theme.Background
+import com.example.tambala.ui.theme.CardBorder
+import com.example.tambala.ui.theme.ExpenseRed
 import com.example.tambala.ui.theme.GreenPrimary
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
@@ -38,39 +40,25 @@ import com.example.tambala.ui.theme.TextSecondary
 @Composable
 fun BudgetsScreen() {
     Scaffold(
+        topBar = {
+            TopNavBar(
+                title = "Budgets",
+                subtitle = "November 2024",
+                badgeText = "Active Term",
+                badgeColor = GreenPrimary
+            )
+        },
         bottomBar = {
-            BottomNavBar(selectedIndex = 2) // Budgets tab
+            BottomNavBar(selectedIndex = 1) // Budgets tab
         }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FA))
+                .background(Background)
                 .padding(innerPadding)
         ) {
-            // Header
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Budgets",
-                        color = TextPrimary,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "November 2024",
-                        color = GreenPrimary,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
             // Monthly Snapshot Card
             item {
@@ -79,13 +67,16 @@ fun BudgetsScreen() {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    border = BorderStroke(1.dp, CardBorder),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    shape = RoundedCornerShape(20.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(18.dp)) {
                         Text(
                             text = "MONTHLY SNAPSHOT",
                             color = TextSecondary,
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(
@@ -94,15 +85,18 @@ fun BudgetsScreen() {
                         ) {
                             Column {
                                 Text("Allocated", color = TextSecondary, fontSize = 12.sp)
-                                Text("MK 120,000", color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("MK 120,000", color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             }
                             Column {
                                 Text("Spent", color = TextSecondary, fontSize = 12.sp)
-                                Text("MK 45,200", color = Color(0xFFD32F2F), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("MK 45,200", color = ExpenseRed, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             }
                             Column {
                                 Text("Remaining", color = TextSecondary, fontSize = 12.sp)
-                                Text("MK 74,800", color = GreenPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("MK 74,800", color = GreenPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -117,7 +111,7 @@ fun BudgetsScreen() {
                     text = "Active Budgets",
                     color = TextPrimary,
                     fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
@@ -158,7 +152,7 @@ fun BudgetsScreen() {
                     text = "Unbudgeted Categories",
                     color = TextPrimary,
                     fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
@@ -191,7 +185,9 @@ fun UnbudgetedItem(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        border = BorderStroke(1.dp, CardBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier
@@ -210,7 +206,7 @@ fun UnbudgetedItem(
                 text = "+ Set Limit",
                 color = GreenPrimary,
                 fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Bold
             )
         }
     }

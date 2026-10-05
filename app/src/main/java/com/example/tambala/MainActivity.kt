@@ -10,7 +10,11 @@ import androidx.compose.ui.Modifier
 //import com.example.tambala.ui.components.BalanceCard
 import com.example.tambala.ui.theme.TambalaTheme
 //import com.example.tambala.ui.components.BalanceCard
-import com.example.tambala.ui.pages.BudgetsScreen
+//import com.example.tambala.ui.pages.BudgetsScreen
+import com.example.tambala.ui.pages.DashboardScreen
+//import com.example.tambala.ui.pages.WalletsScreen
+
+//import com.example.tambala.ui.pages.SplashPage
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,7 +25,8 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    BudgetsScreen()
+                    DashboardScreen()
+
 
 
 

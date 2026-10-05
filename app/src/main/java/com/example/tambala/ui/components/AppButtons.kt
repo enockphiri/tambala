@@ -1,6 +1,7 @@
 package com.example.tambala.ui.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,13 +18,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tambala.ui.theme.ExpenseRed
 import com.example.tambala.ui.theme.GreenPrimary
+import com.example.tambala.ui.theme.IncomeGreen
 
 @Composable
 fun PrimaryButton(
     text: String,
     onClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    containerColor: Color = GreenPrimary,
+    contentColor: Color = Color.White
 ) {
     Button(
         onClick = onClick,
@@ -32,8 +37,8 @@ fun PrimaryButton(
             .height(52.dp),
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = GreenPrimary,
-            contentColor = Color.White
+            containerColor = containerColor,
+            contentColor = contentColor
         )
     ) {
         Text(
@@ -45,10 +50,61 @@ fun PrimaryButton(
 }
 
 @Composable
-fun SecondaryButton(
+fun ExpenseButton(
     text: String,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = ExpenseRed,
+            contentColor = Color.White
+        )
+    ) {
+        Text(
+            text = text,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+fun IncomeButton(
+    text: String,
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = IncomeGreen,
+            contentColor = Color.White
+        )
+    ) {
+        Text(
+            text = text,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+fun SecondaryButton(
+    text: String,
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier,
+    contentColor: Color = GreenPrimary
 ) {
     OutlinedButton(
         onClick = onClick,
@@ -57,7 +113,7 @@ fun SecondaryButton(
             .height(52.dp),
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = GreenPrimary
+            contentColor = contentColor
         )
     ) {
         Text(
@@ -72,8 +128,14 @@ fun SecondaryButton(
 @Composable
 fun AppButtonsPreview() {
     Column(modifier = Modifier.padding(16.dp)) {
-        PrimaryButton(text = "Log Cash Spent")
+        Row(modifier = Modifier.fillMaxWidth()) {
+            ExpenseButton(text = "- Log Expense", modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(12.dp))
+            IncomeButton(text = "+ Add Income", modifier = Modifier.weight(1f))
+        }
         Spacer(modifier = Modifier.height(12.dp))
-        SecondaryButton(text = "Add Income")
+        PrimaryButton(text = "Primary Button")
+        Spacer(modifier = Modifier.height(12.dp))
+        SecondaryButton(text = "Secondary Button")
     }
 }

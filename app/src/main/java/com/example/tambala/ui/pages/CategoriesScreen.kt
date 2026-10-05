@@ -1,7 +1,7 @@
 package com.example.tambala.ui.pages
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,13 +17,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.Home
-//import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.MoreVert
-//import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Restaurant
-//import androidx.compose.material.icons.filled.ShoppingBag
-//import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -41,47 +37,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
 import com.example.tambala.ui.components.PrimaryButton
-//import com.example.tambala.ui.theme.GreenPrimary
+import com.example.tambala.ui.components.TopNavBar
+import com.example.tambala.ui.theme.Background
+import com.example.tambala.ui.theme.CardBorder
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
 @Composable
 fun CategoriesScreen() {
     Scaffold(
+        topBar = {
+            TopNavBar(
+                title = "Categories",
+                subtitle = "Organize your campus budget flow"
+            )
+        },
         bottomBar = {
-            BottomNavBar(selectedIndex = 3)
+            BottomNavBar(selectedIndex = 2)
         }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FA))
+                .background(Background)
                 .padding(innerPadding)
         ) {
-            // Header
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "Categories",
-                            color = TextPrimary,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Organize your campus budget flow",
-                            color = TextSecondary,
-                            fontSize = 13.sp
-                        )
-                    }
-                }
-            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
             // Add Category Button
             item {
@@ -99,7 +80,7 @@ fun CategoriesScreen() {
                     text = "ACTIVE OUTFLOWS",
                     color = TextSecondary,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
@@ -119,16 +100,6 @@ fun CategoriesScreen() {
             item {
                 CategoryItem("Transport", "34 minibus rides logged", Icons.Default.DirectionsBus, Color(0xFF42A5F5))
             }
-           // item {
-               // CategoryItem("Airtime & Data", "12 bundle recharges", Icons.Default.PhoneAndroid, Color(0xFF66BB6A))
-           // }
-            //item {
-             //   CategoryItem("Medical & Clinic", "3 pharmacy claims", Icons.Default.LocalHospital, Color(0xFFEF5350))
-           // }
-           // item {
-              //  CategoryItem("Entertainment", "Weekend campus leisure", Icons.Default.SportsEsports, Color(0xFFAB47BC))
-           // }
-            
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
         }
@@ -147,7 +118,8 @@ fun CategoryItem(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, CardBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(

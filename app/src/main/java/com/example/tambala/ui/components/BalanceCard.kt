@@ -1,5 +1,6 @@
 package com.example.tambala.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,7 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tambala.ui.theme.CardBorder
 import com.example.tambala.ui.theme.ExpenseRed
+import com.example.tambala.ui.theme.ExpenseRedLight
 import com.example.tambala.ui.theme.GreenContainer
 import com.example.tambala.ui.theme.GreenPrimary
 import com.example.tambala.ui.theme.IncomeGreen
@@ -39,7 +42,9 @@ fun BalanceCard(
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        border = BorderStroke(1.dp, CardBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
@@ -48,7 +53,8 @@ fun BalanceCard(
             Text(
                 text = "TOTAL AVAILABLE BALANCE",
                 color = TextSecondary,
-                fontSize = 12.sp
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -68,47 +74,49 @@ fun BalanceCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Income Box
+                // Income Box (GREEN)
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(14.dp))
                         .background(GreenContainer)
                         .padding(12.dp)
                 ) {
                     Text(
                         text = "↓ Income",
                         color = TextSecondary,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = income,
                         color = IncomeGreen,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
-                // Expenses Box
+                // Expenses Box (RED)
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFFFEBEE))
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(ExpenseRedLight)
                         .padding(12.dp)
                 ) {
                     Text(
                         text = "↑ Expenses",
                         color = TextSecondary,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = expenses,
                         color = ExpenseRed,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }

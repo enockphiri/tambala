@@ -28,7 +28,8 @@ import com.example.tambala.ui.components.AccountItem
 import com.example.tambala.ui.components.BalanceCard
 import com.example.tambala.ui.components.BottomNavBar
 import com.example.tambala.ui.components.PrimaryButton
-import com.example.tambala.ui.theme.GreenPrimary
+import com.example.tambala.ui.components.TopNavBar
+import com.example.tambala.ui.theme.Background
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
@@ -37,6 +38,13 @@ fun WalletsScreen(
     onAddAccountClick: () -> Unit = {}
 ) {
     Scaffold(
+        topBar = {
+            TopNavBar(
+                title = "Wallets",
+                subtitle = "4 connected sources",
+                badgeText = "73 days left"
+            )
+        },
         bottomBar = {
             BottomNavBar(selectedIndex = 1) // Wallets tab
         }
@@ -44,32 +52,10 @@ fun WalletsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF8F9FA))
+                .background(Background)
                 .padding(innerPadding)
         ) {
-            // Header
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Wallets",
-                        color = TextPrimary,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "73 days left",
-                        color = GreenPrimary,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
             // Total Balance Card
             item {
@@ -96,18 +82,18 @@ fun WalletsScreen(
                             text = "Accounts",
                             color = TextPrimary,
                             fontSize = 17.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = "4 connected sources",
                             color = TextSecondary,
-                            fontSize = 13.sp
+                            fontSize = 12.sp
                         )
                     }
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(12.dp)) }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
 
             // Account Items
             item {

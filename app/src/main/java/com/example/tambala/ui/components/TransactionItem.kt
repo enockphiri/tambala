@@ -1,21 +1,28 @@
 package com.example.tambala.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,7 +35,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.theme.ExpenseRed
+import com.example.tambala.ui.theme.ExpenseRedBorder
+import com.example.tambala.ui.theme.ExpenseRedLight
 import com.example.tambala.ui.theme.IncomeGreen
+import com.example.tambala.ui.theme.IncomeGreenBorder
+import com.example.tambala.ui.theme.IncomeGreenLight
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
@@ -41,58 +52,93 @@ fun TransactionItem(
     iconBackground: Color,
     isIncome: Boolean = false
 ) {
-    Row(
+    val cardBg = if (isIncome) IncomeGreenLight else ExpenseRedLight
+    val cardBorderColor = if (isIncome) IncomeGreenBorder else ExpenseRedBorder
+    val amountColor = if (isIncome) IncomeGreen else ExpenseRed
+    val badgeLabel = if (isIncome) "INCOME" else "EXPENSE"
+
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 5.dp),
+        colors = CardDefaults.cardColors(containerColor = cardBg),
+        border = BorderStroke(1.dp, cardBorderColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        // Icon Circle
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = Color.White,
+        Row(
             modifier = Modifier
-                .size(42.dp)
-                .clip(CircleShape)
-                .background(iconBackground)
-                .padding(9.dp)
-        )
-
-        Spacer(modifier = Modifier.width(14.dp))
-
-        // Title + Subtitle
-        Column(
-            modifier = Modifier.weight(1f)
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = title,
-                color = TextPrimary,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium
+            // Icon Circle
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(iconBackground)
+                    .padding(9.dp)
             )
-            Spacer(modifier = Modifier.size(3.dp))
-            Text(
-                text = subtitle,
-                color = TextSecondary,
-                fontSize = 12.sp
-            )
-        }
 
-        // Amount
-        Text(
-            text = amount,
-            color = if (isIncome) IncomeGreen else ExpenseRed,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold
-        )
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Title + Subtitle
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    color = TextPrimary,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    color = TextSecondary,
+                    fontSize = 12.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Amount + Tag
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = amount,
+                    color = amountColor,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Surface(
+                    color = amountColor.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = badgeLabel,
+                        color = amountColor,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun TransactionItemPreview() {
-    Column {
+    Column(modifier = Modifier.padding(vertical = 10.dp)) {
         TransactionItem(
             title = "Campus Cafeteria Lunch",
             subtitle = "Oct 15 • Food • Cash",
@@ -137,6 +183,5 @@ fun TransactionItemPreview() {
             iconBackground = Color(0xFFAB47BC),
             isIncome = true
         )
-
     }
 }

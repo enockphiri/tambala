@@ -1,5 +1,6 @@
 package com.example.tambala.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tambala.ui.theme.CardBorder
+import com.example.tambala.ui.theme.ExpenseRed
 import com.example.tambala.ui.theme.GreenMain
 import com.example.tambala.ui.theme.GreenPrimary
 import com.example.tambala.ui.theme.TextPrimary
@@ -46,12 +49,19 @@ fun BudgetProgressItem(
     iconBackground: Color,
     targetPerDay: String = ""
 ) {
+    val barColor = when {
+        progress >= 0.9f -> ExpenseRed
+        progress >= 0.75f -> Color(0xFFFF9800)
+        else -> GreenMain
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, CardBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -96,21 +106,21 @@ fun BudgetProgressItem(
                     text = remaining,
                     color = GreenPrimary,
                     fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Progress Bar (Built-in)
+            // Progress Bar
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp)),
-                color = GreenMain,
-                trackColor = Color(0xFFE0E0E0)
+                color = barColor,
+                trackColor = Color(0xFFE2E8F0)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -157,7 +167,7 @@ fun BudgetProgressItemPreview() {
             spent = "MK 13,200",
             limit = "MK 25,000",
             remaining = "MK 11,800 left",
-            progress = 0.52f,
+            progress = 0.72f,
             icon = Icons.Default.DirectionsBus,
             iconBackground = Color(0xFF42A5F5),
             targetPerDay = "MK 830/day"
