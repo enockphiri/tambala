@@ -47,6 +47,7 @@ import com.example.tambala.ui.components.TopNavBar
 import com.example.tambala.ui.components.TransactionItem
 import com.example.tambala.ui.theme.Background
 import com.example.tambala.ui.theme.CardBorder
+import com.example.tambala.ui.theme.GreenContainer
 import com.example.tambala.ui.theme.GreenPrimary
 import com.example.tambala.ui.theme.TextPrimary
 
@@ -54,6 +55,7 @@ import com.example.tambala.ui.theme.TextPrimary
 fun DashboardScreen(
     onLogExpenseClick: () -> Unit = {},
     onAddIncomeClick: () -> Unit = {},
+    onNavigateToTab: (Int) -> Unit = {},
     onNavigateToBudgets: () -> Unit = {},
     onNavigateToCategories: () -> Unit = {},
     onNavigateToAnalysis: () -> Unit = {}
@@ -68,7 +70,7 @@ fun DashboardScreen(
             )
         },
         bottomBar = {
-            BottomNavBar(selectedIndex = 0)
+            BottomNavBar(selectedIndex = 0, onItemSelected = onNavigateToTab)
         }
     ) { innerPadding ->
         LazyColumn(
@@ -112,7 +114,7 @@ fun DashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     ExpenseButton(
-                        text = "- Log Expense",
+                        text = "- Expense",
                         onClick = onLogExpenseClick,
                         modifier = Modifier.weight(1f)
                     )
@@ -126,7 +128,7 @@ fun DashboardScreen(
 
             item { Spacer(modifier = Modifier.height(12.dp)) }
 
-            // Quick Shortcut Row
+            // Quick Shortcut Row - Clean Minimal Emerald Palette
             item {
                 Card(
                     modifier = Modifier
@@ -147,22 +149,16 @@ fun DashboardScreen(
                         QuickActionShortcut(
                             title = "Set Budget",
                             icon = Icons.Default.PieChart,
-                            iconBg = Color(0xFFE8F5E9),
-                            tint = GreenPrimary,
                             onClick = onNavigateToBudgets
                         )
                         QuickActionShortcut(
                             title = "Categories",
                             icon = Icons.Default.Category,
-                            iconBg = Color(0xFFE0F2F1),
-                            tint = Color(0xFF00796B),
                             onClick = onNavigateToCategories
                         )
                         QuickActionShortcut(
                             title = "Analytics",
                             icon = Icons.AutoMirrored.Filled.TrendingUp,
-                            iconBg = Color(0xFFE3F2FD),
-                            tint = Color(0xFF1976D2),
                             onClick = onNavigateToAnalysis
                         )
                     }
@@ -204,7 +200,6 @@ fun DashboardScreen(
                     subtitle = "Oct 15 • Food • Cash",
                     amount = "-MK 1,800",
                     icon = Icons.Default.Restaurant,
-                    iconBackground = Color(0xFFFF9800),
                     isIncome = false
                 )
             }
@@ -214,7 +209,6 @@ fun DashboardScreen(
                     subtitle = "Oct 15 • Printing • Cash",
                     amount = "-MK 300",
                     icon = Icons.Default.Print,
-                    iconBackground = Color(0xFF42A5F5),
                     isIncome = false
                 )
             }
@@ -224,7 +218,6 @@ fun DashboardScreen(
                     subtitle = "Oct 14 • Airtime • Airtel",
                     amount = "-MK 2,000",
                     icon = Icons.Default.Wifi,
-                    iconBackground = Color(0xFF26A69A),
                     isIncome = false
                 )
             }
@@ -234,7 +227,6 @@ fun DashboardScreen(
                     subtitle = "Oct 12 • Grant • Bank",
                     amount = "+MK 250,000",
                     icon = Icons.Default.AccountBalance,
-                    iconBackground = Color(0xFF66BB6A),
                     isIncome = true
                 )
             }
@@ -244,7 +236,6 @@ fun DashboardScreen(
                     subtitle = "Oct 10 • Allowance • Airtel",
                     amount = "+MK 50,000",
                     icon = Icons.Default.PhoneAndroid,
-                    iconBackground = Color(0xFFAB47BC),
                     isIncome = true
                 )
             }
@@ -258,8 +249,6 @@ fun DashboardScreen(
 fun QuickActionShortcut(
     title: String,
     icon: ImageVector,
-    iconBg: Color,
-    tint: Color,
     onClick: () -> Unit = {}
 ) {
     Column(
@@ -272,11 +261,11 @@ fun QuickActionShortcut(
         Icon(
             imageVector = icon,
             contentDescription = title,
-            tint = tint,
+            tint = GreenPrimary,
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(iconBg)
+                .background(GreenContainer)
                 .padding(10.dp)
         )
         Spacer(modifier = Modifier.height(6.dp))

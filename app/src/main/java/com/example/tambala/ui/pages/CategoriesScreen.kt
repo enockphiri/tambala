@@ -40,11 +40,15 @@ import com.example.tambala.ui.components.PrimaryButton
 import com.example.tambala.ui.components.TopNavBar
 import com.example.tambala.ui.theme.Background
 import com.example.tambala.ui.theme.CardBorder
+import com.example.tambala.ui.theme.GreenContainer
+import com.example.tambala.ui.theme.GreenPrimary
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
 @Composable
-fun CategoriesScreen() {
+fun CategoriesScreen(
+    onNavigateToTab: (Int) -> Unit = {}
+) {
     Scaffold(
         topBar = {
             TopNavBar(
@@ -53,7 +57,7 @@ fun CategoriesScreen() {
             )
         },
         bottomBar = {
-            BottomNavBar(selectedIndex = 2)
+            BottomNavBar(selectedIndex = 2, onItemSelected = onNavigateToTab)
         }
     ) { innerPadding ->
         LazyColumn(
@@ -87,18 +91,18 @@ fun CategoriesScreen() {
 
             item { Spacer(modifier = Modifier.height(10.dp)) }
 
-            // Categories
+            // Categories - Unified Minimal Green Palette
             item {
-                CategoryItem("Food & Dining", "48 campus logs this term", Icons.Default.Restaurant, Color(0xFFFF9800))
+                CategoryItem("Food & Dining", "48 campus logs this term", Icons.Default.Restaurant)
             }
             item {
-                CategoryItem("Rent & Hostel", "Monthly fixed allocation", Icons.Default.Home, Color(0xFF5C6BC0))
+                CategoryItem("Rent & Hostel", "Monthly fixed allocation", Icons.Default.Home)
             }
             item {
-                CategoryItem("Assignment & Printing", "19 print center visits", Icons.Default.Print, Color(0xFF26A69A))
+                CategoryItem("Assignment & Printing", "19 print center visits", Icons.Default.Print)
             }
             item {
-                CategoryItem("Transport", "34 minibus rides logged", Icons.Default.DirectionsBus, Color(0xFF42A5F5))
+                CategoryItem("Transport", "34 minibus rides logged", Icons.Default.DirectionsBus)
             }
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
@@ -110,8 +114,7 @@ fun CategoriesScreen() {
 fun CategoryItem(
     title: String,
     subtitle: String,
-    icon: ImageVector,
-    iconBg: Color
+    icon: ImageVector
 ) {
     Card(
         modifier = Modifier
@@ -131,11 +134,11 @@ fun CategoryItem(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color.White,
+                tint = GreenPrimary,
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(iconBg)
+                    .background(GreenContainer)
                     .padding(9.dp)
             )
 

@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.theme.ExpenseRed
 import com.example.tambala.ui.theme.ExpenseRedBorder
 import com.example.tambala.ui.theme.ExpenseRedLight
+import com.example.tambala.ui.theme.GreenContainer
 import com.example.tambala.ui.theme.IncomeGreen
 import com.example.tambala.ui.theme.IncomeGreenBorder
 import com.example.tambala.ui.theme.IncomeGreenLight
@@ -49,12 +49,12 @@ fun TransactionItem(
     subtitle: String,
     amount: String,
     icon: ImageVector,
-    iconBackground: Color,
     isIncome: Boolean = false
 ) {
     val cardBg = if (isIncome) IncomeGreenLight else ExpenseRedLight
     val cardBorderColor = if (isIncome) IncomeGreenBorder else ExpenseRedBorder
     val amountColor = if (isIncome) IncomeGreen else ExpenseRed
+    val iconBgColor = if (isIncome) GreenContainer else ExpenseRedLight
     val badgeLabel = if (isIncome) "INCOME" else "EXPENSE"
 
     Card(
@@ -63,7 +63,7 @@ fun TransactionItem(
             .padding(horizontal = 16.dp, vertical = 5.dp),
         colors = CardDefaults.cardColors(containerColor = cardBg),
         border = BorderStroke(1.dp, cardBorderColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -72,15 +72,15 @@ fun TransactionItem(
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon Circle
+            // Icon Container
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color.White,
+                tint = amountColor,
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(iconBackground)
+                    .background(iconBgColor)
                     .padding(9.dp)
             )
 
@@ -144,7 +144,6 @@ fun TransactionItemPreview() {
             subtitle = "Oct 15 • Food • Cash",
             amount = "-MK 1,800",
             icon = Icons.Default.Restaurant,
-            iconBackground = Color(0xFFFF9800),
             isIncome = false
         )
 
@@ -153,7 +152,6 @@ fun TransactionItemPreview() {
             subtitle = "Oct 15 • Printing • Cash",
             amount = "-MK 300",
             icon = Icons.Default.Print,
-            iconBackground = Color(0xFF42A5F5),
             isIncome = false
         )
 
@@ -162,7 +160,6 @@ fun TransactionItemPreview() {
             subtitle = "Oct 14 • Airtime • Airtel",
             amount = "-MK 2,000",
             icon = Icons.Default.Wifi,
-            iconBackground = Color(0xFF26A69A),
             isIncome = false
         )
 
@@ -171,7 +168,6 @@ fun TransactionItemPreview() {
             subtitle = "Oct 12 • Grant • Bank",
             amount = "+MK 250,000",
             icon = Icons.Default.AccountBalance,
-            iconBackground = Color(0xFF66BB6A),
             isIncome = true
         )
 
@@ -180,7 +176,6 @@ fun TransactionItemPreview() {
             subtitle = "Oct 10 • Allowance • Airtel",
             amount = "+MK 50,000",
             icon = Icons.Default.PhoneAndroid,
-            iconBackground = Color(0xFFAB47BC),
             isIncome = true
         )
     }

@@ -1,5 +1,6 @@
 package com.example.tambala.ui.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Home
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.PieChart
 import androidx.compose.material.icons.outlined.TrendingUp
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -18,12 +20,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.tambala.ui.theme.DividerColor
+import com.example.tambala.ui.theme.GreenContainer
 import com.example.tambala.ui.theme.GreenPrimary
 import com.example.tambala.ui.theme.NavUnselected
 
-// Data class for each navigation item
 data class BottomNavItem(
     val title: String,
     val selectedIcon: ImageVector,
@@ -43,34 +48,46 @@ fun BottomNavBar(
     )
 
     Surface(
-        shadowElevation = 8.dp,
-        color = Color.White
+        color = Color.White,
+        shadowElevation = 8.dp
     ) {
-        NavigationBar(
-            containerColor = Color.White,
-            tonalElevation = 0.dp
-        ) {
-            items.forEachIndexed { index, item ->
-                NavigationBarItem(
-                    selected = selectedIndex == index,
-                    onClick = { onItemSelected(index) },
-                    icon = {
-                        Icon(
-                            imageVector = if (selectedIndex == index) item.selectedIcon else item.unselectedIcon,
-                            contentDescription = item.title
+        Column {
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = DividerColor
+            )
+
+            NavigationBar(
+                containerColor = Color.White,
+                tonalElevation = 0.dp
+            ) {
+                items.forEachIndexed { index, item ->
+                    val isSelected = selectedIndex == index
+                    NavigationBarItem(
+                        selected = isSelected,
+                        onClick = { onItemSelected(index) },
+                        icon = {
+                            Icon(
+                                imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
+                                contentDescription = item.title
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = item.title,
+                                fontSize = 11.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = GreenPrimary,
+                            selectedTextColor = GreenPrimary,
+                            unselectedIconColor = NavUnselected,
+                            unselectedTextColor = NavUnselected,
+                            indicatorColor = GreenContainer
                         )
-                    },
-                    label = {
-                        Text(text = item.title)
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = GreenPrimary,
-                        selectedTextColor = GreenPrimary,
-                        unselectedIconColor = NavUnselected,
-                        unselectedTextColor = NavUnselected,
-                        indicatorColor = GreenPrimary.copy(alpha = 0.12f)
                     )
-                )
+                }
             }
         }
     }

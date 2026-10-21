@@ -31,12 +31,15 @@ import com.example.tambala.ui.components.TopNavBar
 import com.example.tambala.ui.theme.Background
 import com.example.tambala.ui.theme.CardBorder
 import com.example.tambala.ui.theme.ExpenseRed
+import com.example.tambala.ui.theme.GreenPrimary
 import com.example.tambala.ui.theme.IncomeGreen
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
 @Composable
-fun AnalysisScreen() {
+fun AnalysisScreen(
+    onNavigateToTab: (Int) -> Unit = {}
+) {
     Scaffold(
         topBar = {
             TopNavBar(
@@ -45,7 +48,7 @@ fun AnalysisScreen() {
             )
         },
         bottomBar = {
-            BottomNavBar(selectedIndex = 3)
+            BottomNavBar(selectedIndex = 3, onItemSelected = onNavigateToTab)
         }
     ) { innerPadding ->
         LazyColumn(
@@ -64,7 +67,7 @@ fun AnalysisScreen() {
                         .padding(horizontal = 16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     border = BorderStroke(1.dp, CardBorder),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     shape = RoundedCornerShape(20.dp)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
@@ -126,12 +129,12 @@ fun AnalysisScreen() {
 
             item { Spacer(modifier = Modifier.height(10.dp)) }
 
-            // Breakdown Items
-            item { BreakdownItem("Food & Dining", "36%", "MK 34,500", Color(0xFFFF9800)) }
-            item { BreakdownItem("Rent & Hostel", "28%", "MK 26,800", Color(0xFF5C6BC0)) }
-            item { BreakdownItem("Transport", "18%", "MK 17,200", Color(0xFF42A5F5)) }
-            item { BreakdownItem("Academic Printing", "11%", "MK 10,500", Color(0xFF26A69A)) }
-            item { BreakdownItem("Airtime & Others", "7%", "MK 6,800", Color(0xFFAB47BC)) }
+            // Breakdown Items - Clean Minimal Green Accent Palette
+            item { BreakdownItem("Food & Dining", "36%", "MK 34,500") }
+            item { BreakdownItem("Rent & Hostel", "28%", "MK 26,800") }
+            item { BreakdownItem("Transport", "18%", "MK 17,200") }
+            item { BreakdownItem("Academic Printing", "11%", "MK 10,500") }
+            item { BreakdownItem("Airtime & Others", "7%", "MK 6,800") }
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
         }
@@ -142,8 +145,7 @@ fun AnalysisScreen() {
 fun BreakdownItem(
     title: String,
     percentage: String,
-    amount: String,
-    color: Color
+    amount: String
 ) {
     Card(
         modifier = Modifier
@@ -160,11 +162,11 @@ fun BreakdownItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Color indicator
+            // Clean Green Indicator Dot
             Spacer(
                 modifier = Modifier
-                    .size(12.dp)
-                    .background(color, shape = RoundedCornerShape(50))
+                    .size(10.dp)
+                    .background(GreenPrimary, shape = RoundedCornerShape(50))
             )
 
             Spacer(modifier = Modifier.width(12.dp))

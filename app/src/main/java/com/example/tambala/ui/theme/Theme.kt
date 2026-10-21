@@ -13,41 +13,41 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Light Color Scheme (Main one we will use)
+// Standard Light Color Scheme (Material Design 3)
 private val LightColorScheme = lightColorScheme(
-    primary = GreenPrimary,                 // Dark green - buttons, selected items
-    onPrimary = Color.White,                // Text/icons on primary buttons
-    primaryContainer = GreenContainer,      // Light green containers
-    onPrimaryContainer = GreenPrimary,      // Text on light green containers
+    primary = GreenPrimary,                 // Primary Forest Green
+    onPrimary = Color.White,                // Text on Primary
+    primaryContainer = GreenContainer,      // Light Emerald Container
+    onPrimaryContainer = GreenPrimary,      // Text on Light Emerald Container
 
-    secondary = GreenMain,                  // Secondary green
+    secondary = GreenMain,                  // Secondary Accent Green
     onSecondary = Color.White,
     secondaryContainer = GreenSoft,
     onSecondaryContainer = GreenPrimary,
 
-    tertiary = PurpleIcon,
+    tertiary = GreenMain,
     onTertiary = Color.White,
-    tertiaryContainer = PurpleSoft,
-    onTertiaryContainer = PurpleIcon,
+    tertiaryContainer = GreenContainer,
+    onTertiaryContainer = GreenPrimary,
 
-    background = Background,                // App background
-    onBackground = TextPrimary,             // Main text on background
+    background = Background,                // Standard Neutral Background
+    onBackground = TextPrimary,             // Primary Text
 
-    surface = Surface,                      // Cards and surfaces
-    onSurface = TextPrimary,                // Text on cards
-    surfaceVariant = Color(0xFFF1F5F9),
-    onSurfaceVariant = TextSecondary,      // Secondary text
+    surface = Surface,                      // White Card Surface
+    onSurface = TextPrimary,                // Text on Cards
+    surfaceVariant = Color(0xFFF8FAFC),
+    onSurfaceVariant = TextSecondary,       // Secondary Text
 
     error = ExpenseRed,
     onError = Color.White,
     errorContainer = ExpenseRedLight,
     onErrorContainer = ExpenseRed,
 
-    outline = DividerColor,
+    outline = CardBorder,
     outlineVariant = DividerColor
 )
 
-// Dark Color Scheme (Optional - basic version)
+// Standard Dark Color Scheme
 private val DarkColorScheme = darkColorScheme(
     primary = GreenLight,
     onPrimary = Color.Black,
@@ -70,13 +70,11 @@ private val DarkColorScheme = darkColorScheme(
 @Composable
 fun TambalaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false,          // We disable dynamic color to keep our green brand
+    dynamicColor: Boolean = false,          // We use our clean brand color palette
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            // We force our custom colors instead of dynamic
             if (darkTheme) DarkColorScheme else LightColorScheme
         }
         darkTheme -> DarkColorScheme
@@ -94,7 +92,7 @@ fun TambalaTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,          // Uses the default Type.kt
+        typography = Typography,
         content = content
     )
 }

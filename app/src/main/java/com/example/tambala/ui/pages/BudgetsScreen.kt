@@ -38,7 +38,9 @@ import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
 @Composable
-fun BudgetsScreen() {
+fun BudgetsScreen(
+    onNavigateToTab: (Int) -> Unit = {}
+) {
     Scaffold(
         topBar = {
             TopNavBar(
@@ -49,7 +51,7 @@ fun BudgetsScreen() {
             )
         },
         bottomBar = {
-            BottomNavBar(selectedIndex = 1) // Budgets tab
+            BottomNavBar(selectedIndex = 1, onItemSelected = onNavigateToTab) // Budgets tab
         }
     ) { innerPadding ->
         LazyColumn(
@@ -127,7 +129,6 @@ fun BudgetsScreen() {
                     remaining = "MK 28,000 left",
                     progress = 0.53f,
                     icon = Icons.Default.Restaurant,
-                    iconBackground = Color(0xFFFF9800),
                     targetPerDay = "MK 2,000/day"
                 )
             }
@@ -139,7 +140,6 @@ fun BudgetsScreen() {
                     remaining = "MK 11,800 left",
                     progress = 0.72f,
                     icon = Icons.Default.DirectionsBus,
-                    iconBackground = Color(0xFF42A5F5),
                     targetPerDay = "MK 830/day"
                 )
             }
@@ -161,13 +161,13 @@ fun BudgetsScreen() {
 
             // Simple unbudgeted items
             item {
-                UnbudgetedItem(title = "Academic Printing", iconBg = Color(0xFF42A5F5))
+                UnbudgetedItem(title = "Academic Printing")
             }
             item {
-                UnbudgetedItem(title = "Airtime & Data", iconBg = Color(0xFF26A69A))
+                UnbudgetedItem(title = "Airtime & Data")
             }
             item {
-                UnbudgetedItem(title = "Rent & Hostel", iconBg = Color(0xFF5C6BC0))
+                UnbudgetedItem(title = "Rent & Hostel")
             }
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
@@ -177,8 +177,7 @@ fun BudgetsScreen() {
 
 @Composable
 fun UnbudgetedItem(
-    title: String,
-    iconBg: Color
+    title: String
 ) {
     Card(
         modifier = Modifier

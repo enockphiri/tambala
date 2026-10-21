@@ -2,40 +2,32 @@ package com.example.tambala.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary Green Branding
-val GreenPrimary = Color(0xFF1B5E20)
-val GreenMain = Color(0xFF2E7D32)
-val GreenLight = Color(0xFF4CAF50)
-val GreenContainer = Color(0xFFE8F5E9)
-val GreenSoft = Color(0xFFC8E6C9)
+// Standard Material 3 Emerald/Forest Brand Palette
+val GreenPrimary = Color(0xFF15803D)         // Forest Green (Primary)
+val GreenMain = Color(0xFF16A34A)            // Accent Green
+val GreenLight = Color(0xFF4ADE80)           // Light Emerald
+val GreenContainer = Color(0xFFDCFCE7)       // Primary Container (Soft Emerald)
+val GreenSoft = Color(0xFFF0FDF4)            // Soft Surface Tint
 
-// Status Colors for Financial Activities
-val IncomeGreen = Color(0xFF2E7D32)         // + Income amounts & buttons
-val IncomeGreenLight = Color(0xFFE8F5E9)    // Soft green card background
-val IncomeGreenBorder = Color(0xFFA5D6A7)   // Border for income cards
+// Standard Financial Status Colors (Income = Emerald, Expense = Crimson)
+val IncomeGreen = Color(0xFF15803D)          // + Income Green
+val IncomeGreenLight = Color(0xFFDCFCE7)     // Soft Green Card Container
+val IncomeGreenBorder = Color(0xFF86EFAC)    // Income Card Border
 
-val ExpenseRed = Color(0xFFD32F2F)          // - Expense amounts & buttons
-val ExpenseRedLight = Color(0xFFFFEBEE)     // Soft red card background
-val ExpenseRedBorder = Color(0xFFEF9A9A)    // Border for expense cards
+val ExpenseRed = Color(0xFFDC2626)           // - Expense Red
+val ExpenseRedLight = Color(0xFFFEE2E2)      // Soft Red Card Container
+val ExpenseRedBorder = Color(0xFFFCA5A5)     // Expense Card Border
 
-// Accent soft colors
-val PurpleSoft = Color(0xFFF3E5F5)
-val PurpleIcon = Color(0xFF7E57C2)
-val BlueSoft = Color(0xFFE3F2FD)
-val OrangeSoft = Color(0xFFFFF3E0)
-val TealSoft = Color(0xFFE0F2F1)
-val PinkSoft = Color(0xFFFCE4EC)
-val YellowSoft = Color(0xFFFFF8E1)
+// Standard Neutral Palette (Material 3 Specs)
+val Background = Color(0xFFF3F4F6)          // Standard Neutral Background
+val Surface = Color(0xFFFFFFFF)             // Pure White Card Surface
+val CardBorder = Color(0xFFE5E7EB)          // Clean 1dp Card Outline
+val SurfaceVariant = Color(0xFFF8FAFC)       // Subtle Card Surface
+val TextPrimary = Color(0xFF111827)         // Deep Slate Text
+val TextSecondary = Color(0xFF6B7280)       // Medium Gray Text
+val TextTertiary = Color(0xFF9CA3AF)        // Muted Gray Text
+val DividerColor = Color(0xFFE5E7EB)        // Subtle Divider
 
-// Neutral Background & Cards
-val Background = Color(0xFFF0F2F5)         // Slate off-white background for high contrast with white cards
-val Surface = Color(0xFFFFFFFF)            // Pure white cards
-val CardBorder = Color(0xFFE2E8F0)         // Distinct card border
-val TextPrimary = Color(0xFF1A1A1A)
-val TextSecondary = Color(0xFF6B7280)
-val TextTertiary = Color(0xFF9CA3AF)
-val DividerColor = Color(0xFFE5E7EB)
-
-// Bottom Navigation
-val NavSelected = Color(0xFF1B5E20)         // Selected bottom nav icon + label
-val NavUnselected = Color(0xFF9CA3AF)       // Unselected bottom nav icon + label
+// Navigation Colors
+val NavSelected = Color(0xFF15803D)         // Selected Navigation Item
+val NavUnselected = Color(0xFF6B7280)       // Unselected Navigation Item

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.theme.CardBorder
 import com.example.tambala.ui.theme.ExpenseRed
+import com.example.tambala.ui.theme.GreenContainer
 import com.example.tambala.ui.theme.GreenMain
 import com.example.tambala.ui.theme.GreenPrimary
 import com.example.tambala.ui.theme.TextPrimary
@@ -46,12 +47,10 @@ fun BudgetProgressItem(
     remaining: String,
     progress: Float,          // value between 0f and 1f (e.g. 0.53f = 53%)
     icon: ImageVector,
-    iconBackground: Color,
     targetPerDay: String = ""
 ) {
     val barColor = when {
         progress >= 0.9f -> ExpenseRed
-        progress >= 0.75f -> Color(0xFFFF9800)
         else -> GreenMain
     }
 
@@ -72,15 +71,15 @@ fun BudgetProgressItem(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Icon
+                // Icon Container
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = GreenPrimary,
                     modifier = Modifier
                         .size(38.dp)
                         .clip(CircleShape)
-                        .background(iconBackground)
+                        .background(GreenContainer)
                         .padding(8.dp)
                 )
 
@@ -158,7 +157,6 @@ fun BudgetProgressItemPreview() {
             remaining = "MK 28,000 left",
             progress = 0.53f,
             icon = Icons.Default.Restaurant,
-            iconBackground = Color(0xFFFF9800),
             targetPerDay = "MK 2,000/day"
         )
 
@@ -169,7 +167,6 @@ fun BudgetProgressItemPreview() {
             remaining = "MK 11,800 left",
             progress = 0.72f,
             icon = Icons.Default.DirectionsBus,
-            iconBackground = Color(0xFF42A5F5),
             targetPerDay = "MK 830/day"
         )
     }
