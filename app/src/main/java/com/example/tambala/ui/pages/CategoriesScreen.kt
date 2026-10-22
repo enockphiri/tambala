@@ -2,6 +2,8 @@ package com.example.tambala.ui.pages
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,20 +14,31 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DirectionsBus
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,28 +49,126 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
-import com.example.tambala.ui.components.PrimaryButton
 import com.example.tambala.ui.components.TopNavBar
 import com.example.tambala.ui.theme.Background
 import com.example.tambala.ui.theme.CardBorder
-import com.example.tambala.ui.theme.GreenContainer
-import com.example.tambala.ui.theme.GreenPrimary
+import com.example.tambala.ui.theme.IndigoContainer
+import com.example.tambala.ui.theme.IndigoPrimary
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
+import com.example.tambala.ui.viewmodel.FinanceViewModel
 
 @Composable
 fun CategoriesScreen(
-    onNavigateToTab: (Int) -> Unit = {}
+    viewModel: FinanceViewModel = remember { FinanceViewModel() },
+    onNavigateToTab: (Int) -> Unit = {},
+    onSettingsClick: () -> Unit = {}
 ) {
+    var showAddCategoryDialog by remember { mutableStateOf(false) }
+    var categoryNameInput by remember { mutableStateOf("") }
+
+    var showEditDialog by remember { mutableStateOf(false) }
+    var oldCategoryName by remember { mutableStateOf("") }
+    var editCategoryNameInput by remember { mutableStateOf("") }
+
+    if (showAddCategoryDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddCategoryDialog = false },
+            title = { Text("Add Spending Category", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedTextField(
+                        value = categoryNameInput,
+                        onValueChange = { categoryNameInput = it },
+                        label = { Text("Category Name (e.g. Groceries)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (categoryNameInput.isNotBlank()) {
+                            viewModel.addCategory(categoryNameInput)
+                            categoryNameInput = ""
+                            showAddCategoryDialog = false
+                        }
+                    }
+                ) {
+                    Text("Add", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddCategoryDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showEditDialog) {
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = { Text("Edit Category Name", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedTextField(
+                        value = editCategoryNameInput,
+                        onValueChange = { editCategoryNameInput = it },
+                        label = { Text("New Category Name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (editCategoryNameInput.isNotBlank()) {
+                            viewModel.editCategory(oldCategoryName, editCategoryNameInput)
+                            editCategoryNameInput = ""
+                            oldCategoryName = ""
+                            showEditDialog = false
+                        }
+                    }
+                ) {
+                    Text("Save", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopNavBar(
                 title = "Categories",
-                subtitle = "Organize your campus budget flow"
+                subtitle = "Organize your campus budget flow",
+                onProfileClick = onSettingsClick
             )
         },
         bottomBar = {
-            BottomNavBar(selectedIndex = 2, onItemSelected = onNavigateToTab)
+            BottomNavBar(selectedIndex = 2, onItemSelected = onNavigateToTab) // Categories tab index = 2
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddCategoryDialog = true },
+                containerColor = IndigoPrimary,
+                contentColor = Color.White,
+                shape = CircleShape,
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Category",
+                    modifier = Modifier.size(26.dp)
+                )
+            }
         }
     ) { innerPadding ->
         LazyColumn(
@@ -67,16 +178,6 @@ fun CategoriesScreen(
                 .padding(innerPadding)
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            // Add Category Button
-            item {
-                PrimaryButton(
-                    text = "+ Add Category",
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(20.dp)) }
 
             // Section Title
             item {
@@ -91,18 +192,19 @@ fun CategoriesScreen(
 
             item { Spacer(modifier = Modifier.height(10.dp)) }
 
-            // Categories - Unified Minimal Green Palette
-            item {
-                CategoryItem("Food & Dining", "48 campus logs this term", Icons.Default.Restaurant)
-            }
-            item {
-                CategoryItem("Rent & Hostel", "Monthly fixed allocation", Icons.Default.Home)
-            }
-            item {
-                CategoryItem("Assignment & Printing", "19 print center visits", Icons.Default.Print)
-            }
-            item {
-                CategoryItem("Transport", "34 minibus rides logged", Icons.Default.DirectionsBus)
+            // Categories from ViewModel with working edit and delete options
+            items(viewModel.categories) { catName ->
+                CategoryItem(
+                    title = catName,
+                    subtitle = "Custom campus category",
+                    icon = Icons.Default.ShoppingCart,
+                    onEdit = {
+                        oldCategoryName = catName
+                        editCategoryNameInput = catName
+                        showEditDialog = true
+                    },
+                    onDelete = { viewModel.deleteCategory(catName) }
+                )
             }
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
@@ -114,8 +216,12 @@ fun CategoriesScreen(
 fun CategoryItem(
     title: String,
     subtitle: String,
-    icon: ImageVector
+    icon: ImageVector,
+    onEdit: () -> Unit = {},
+    onDelete: () -> Unit = {}
 ) {
+    var menuExpanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,11 +240,11 @@ fun CategoryItem(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = GreenPrimary,
+                tint = IndigoPrimary,
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(GreenContainer)
+                    .background(IndigoContainer)
                     .padding(9.dp)
             )
 
@@ -158,11 +264,34 @@ fun CategoryItem(
                 )
             }
 
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "More",
-                tint = TextSecondary
-            )
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More",
+                        tint = TextSecondary
+                    )
+                }
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Edit Category") },
+                        onClick = {
+                            menuExpanded = false
+                            onEdit()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Delete Category", color = Color.Red) },
+                        onClick = {
+                            menuExpanded = false
+                            onDelete()
+                        }
+                    )
+                }
+            }
         }
     }
 }

@@ -13,64 +13,63 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Standard Light Color Scheme (Material Design 3)
+// Modern Neobank Light Color Scheme
 private val LightColorScheme = lightColorScheme(
-    primary = GreenPrimary,                 // Primary Forest Green
-    onPrimary = Color.White,                // Text on Primary
-    primaryContainer = GreenContainer,      // Light Emerald Container
-    onPrimaryContainer = GreenPrimary,      // Text on Light Emerald Container
+    primary = PrimaryBlue,
+    onPrimary = Color.White,
+    primaryContainer = PrimaryBlueContainer,
+    onPrimaryContainer = PrimaryBlue,
 
-    secondary = GreenMain,                  // Secondary Accent Green
+    secondary = PrimaryBlueLight,
     onSecondary = Color.White,
-    secondaryContainer = GreenSoft,
-    onSecondaryContainer = GreenPrimary,
+    secondaryContainer = PrimaryBlueContainer,
+    onSecondaryContainer = PrimaryBlue,
 
-    tertiary = GreenMain,
+    tertiary = PrimaryBlueLight,
     onTertiary = Color.White,
-    tertiaryContainer = GreenContainer,
-    onTertiaryContainer = GreenPrimary,
+    tertiaryContainer = PrimaryBlueContainer,
+    onTertiaryContainer = PrimaryBlue,
 
-    background = Background,                // Standard Neutral Background
-    onBackground = TextPrimary,             // Primary Text
+    background = Background,
+    onBackground = TextPrimary,
 
-    surface = Surface,                      // White Card Surface
-    onSurface = TextPrimary,                // Text on Cards
-    surfaceVariant = Color(0xFFF8FAFC),
-    onSurfaceVariant = TextSecondary,       // Secondary Text
+    surface = Surface,
+    onSurface = TextPrimary,
+    surfaceVariant = Color(0xFFF1F5F9),
+    onSurfaceVariant = TextSecondary,
 
-    error = ExpenseRed,
+    error = ExpenseRose,
     onError = Color.White,
-    errorContainer = ExpenseRedLight,
-    onErrorContainer = ExpenseRed,
+    errorContainer = ExpenseRoseLight,
+    onErrorContainer = ExpenseRose,
 
     outline = CardBorder,
     outlineVariant = DividerColor
 )
 
-// Standard Dark Color Scheme
 private val DarkColorScheme = darkColorScheme(
-    primary = GreenLight,
+    primary = PrimaryBlueLight,
     onPrimary = Color.Black,
-    primaryContainer = GreenPrimary,
+    primaryContainer = PrimaryBlue,
     onPrimaryContainer = Color.White,
 
-    secondary = GreenSoft,
+    secondary = PrimaryBlueContainer,
     onSecondary = Color.Black,
 
-    background = Color(0xFF121212),
+    background = Color(0xFF0F172A),
     onBackground = Color.White,
 
-    surface = Color(0xFF1E1E1E),
+    surface = Color(0xFF1E293B),
     onSurface = Color.White,
 
-    error = ExpenseRed,
+    error = ExpenseRose,
     onError = Color.White
 )
 
 @Composable
 fun TambalaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,          // We use our clean brand color palette
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

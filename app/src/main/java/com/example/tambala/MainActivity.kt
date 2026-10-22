@@ -1,5 +1,6 @@
 package com.example.tambala
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,13 +13,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.example.tambala.ui.pages.AnalysisScreen
 import com.example.tambala.ui.pages.BudgetsScreen
 import com.example.tambala.ui.pages.CategoriesScreen
 import com.example.tambala.ui.pages.DashboardScreen
 import com.example.tambala.ui.pages.LandingScreen
+import com.example.tambala.ui.pages.SettingsScreen
 import com.example.tambala.ui.pages.SplashPage
+import com.example.tambala.ui.pages.TransactionsScreen
 import com.example.tambala.ui.theme.TambalaTheme
+import com.example.tambala.ui.viewmodel.FinanceViewModel
 
 enum class AppScreen {
     Splash,
@@ -26,19 +31,25 @@ enum class AppScreen {
     Dashboard,
     Budgets,
     Categories,
-    Analysis
+    Analysis,
+    Transactions,
+    Settings
 }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val prefs = getSharedPreferences("tambala_prefs", MODE_PRIVATE)
+        val hasSeenOnboarding = prefs.getBoolean("has_seen_onboarding", false)
+
         setContent {
             TambalaTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    MainApp()
+                    MainApp(initialHasSeenOnboarding = hasSeenOnboarding)
                 }
             }
         }
@@ -46,7 +57,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainApp() {
+fun MainApp(initialHasSeenOnboarding: Boolean) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE) }
+    val viewModel = remember { FinanceViewModel() }
+
     var currentScreen by remember { mutableStateOf(AppScreen.Splash) }
 
     val onNavigateToTab: (Int) -> Unit = { tabIndex ->
@@ -62,34 +77,61 @@ fun MainApp() {
     when (currentScreen) {
         AppScreen.Splash -> {
             SplashPage(
-                onTimeout = { currentScreen = AppScreen.Landing }
+                onTimeout = {
+                    currentScreen = if (initialHasSeenOnboarding) AppScreen.Dashboard else AppScreen.Landing
+                }
             )
         }
         AppScreen.Landing -> {
             LandingScreen(
-                onGetStartedClick = { currentScreen = AppScreen.Dashboard }
+                onGetStartedClick = {
+                    prefs.edit().putBoolean("has_seen_onboarding", true).apply()
+                    currentScreen = AppScreen.Dashboard
+                }
             )
         }
         AppScreen.Dashboard -> {
             DashboardScreen(
+                viewModel = viewModel,
                 onNavigateToTab = onNavigateToTab,
                 onNavigateToBudgets = { currentScreen = AppScreen.Budgets },
                 onNavigateToCategories = { currentScreen = AppScreen.Categories },
-                onNavigateToAnalysis = { currentScreen = AppScreen.Analysis }
+                onNavigateToAnalysis = { currentScreen = AppScreen.Analysis },
+                onNavigateToTransactions = { currentScreen = AppScreen.Transactions },
+                onSettingsClick = { currentScreen = AppScreen.Settings }
             )
         }
         AppScreen.Budgets -> {
             BudgetsScreen(
-                onNavigateToTab = onNavigateToTab
+                viewModel = viewModel,
+                onNavigateToTab = onNavigateToTab,
+                onSettingsClick = { currentScreen = AppScreen.Settings }
             )
         }
         AppScreen.Categories -> {
             CategoriesScreen(
-                onNavigateToTab = onNavigateToTab
+                viewModel = viewModel,
+                onNavigateToTab = onNavigateToTab,
+                onSettingsClick = { currentScreen = AppScreen.Settings }
             )
         }
         AppScreen.Analysis -> {
             AnalysisScreen(
+                viewModel = viewModel,
+                onNavigateToTab = onNavigateToTab,
+                onSettingsClick = { currentScreen = AppScreen.Settings }
+            )
+        }
+        AppScreen.Transactions -> {
+            TransactionsScreen(
+                viewModel = viewModel,
+                onNavigateToTab = onNavigateToTab,
+                onSettingsClick = { currentScreen = AppScreen.Settings }
+            )
+        }
+        AppScreen.Settings -> {
+            SettingsScreen(
+                viewModel = viewModel,
                 onNavigateToTab = onNavigateToTab
             )
         }

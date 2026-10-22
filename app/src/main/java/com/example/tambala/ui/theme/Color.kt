@@ -2,32 +2,54 @@ package com.example.tambala.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Standard Material 3 Emerald/Forest Brand Palette
-val GreenPrimary = Color(0xFF15803D)         // Forest Green (Primary)
-val GreenMain = Color(0xFF16A34A)            // Accent Green
-val GreenLight = Color(0xFF4ADE80)           // Light Emerald
-val GreenContainer = Color(0xFFDCFCE7)       // Primary Container (Soft Emerald)
-val GreenSoft = Color(0xFFF0FDF4)            // Soft Surface Tint
+// Modern Neobank / Fintech Palette (Royal Blue & Mint)
+val PrimaryBlue = Color(0xFF2563EB)         // Royal Blue (Brand / Primary Actions)
+val PrimaryBlueLight = Color(0xFF3B82F6)    // Bright Blue Accent
+val PrimaryBlueContainer = Color(0xFFDBEAFE) // Soft Blue Container
 
-// Standard Financial Status Colors (Income = Emerald, Expense = Crimson)
-val IncomeGreen = Color(0xFF15803D)          // + Income Green
-val IncomeGreenLight = Color(0xFFDCFCE7)     // Soft Green Card Container
-val IncomeGreenBorder = Color(0xFF86EFAC)    // Income Card Border
+val IncomeEmerald = Color(0xFF059669)       // Vibrant Mint / Emerald for Income
+val IncomeEmeraldLight = Color(0xFFECFDF5)  // Soft Emerald Background
+val IncomeEmeraldBorder = Color(0xFFA7F3D0) // Emerald Border
 
-val ExpenseRed = Color(0xFFDC2626)           // - Expense Red
-val ExpenseRedLight = Color(0xFFFEE2E2)      // Soft Red Card Container
-val ExpenseRedBorder = Color(0xFFFCA5A5)     // Expense Card Border
+val ExpenseRose = Color(0xFFE11D48)         // Vibrant Rose / Coral for Expenses
+val ExpenseRoseLight = Color(0xFFFFF1F2)    // Soft Rose Background
+val ExpenseRoseBorder = Color(0xFFFECDD3)   // Rose Border
 
-// Standard Neutral Palette (Material 3 Specs)
-val Background = Color(0xFFF3F4F6)          // Standard Neutral Background
-val Surface = Color(0xFFFFFFFF)             // Pure White Card Surface
-val CardBorder = Color(0xFFE5E7EB)          // Clean 1dp Card Outline
-val SurfaceVariant = Color(0xFFF8FAFC)       // Subtle Card Surface
-val TextPrimary = Color(0xFF111827)         // Deep Slate Text
-val TextSecondary = Color(0xFF6B7280)       // Medium Gray Text
-val TextTertiary = Color(0xFF9CA3AF)        // Muted Gray Text
-val DividerColor = Color(0xFFE5E7EB)        // Subtle Divider
+val Background = Color(0xFFF8FAFC)          // Clean Slate Background
+val Surface = Color(0xFFFFFFFF)             // Pure White Cards
+val CardBorder = Color(0xFFE2E8F0)          // Crisp Border
+val TextPrimary = Color(0xFF0F172A)         // Dark Slate Text
+val TextSecondary = Color(0xFF64748B)       // Muted Gray Text
+val DividerColor = Color(0xFFE2E8F0)
 
-// Navigation Colors
-val NavSelected = Color(0xFF15803D)         // Selected Navigation Item
-val NavUnselected = Color(0xFF6B7280)       // Unselected Navigation Item
+val NavSelected = Color(0xFF2563EB)
+val NavUnselected = Color(0xFF64748B)
+
+// Aliases for compatibility
+val IndigoPrimary = PrimaryBlue
+val IndigoMain = PrimaryBlueLight
+val IndigoLight = PrimaryBlueLight
+val IndigoContainer = PrimaryBlueContainer
+val IndigoSoft = PrimaryBlueContainer
+
+val IncomeTeal = IncomeEmerald
+val IncomeTealLight = IncomeEmeraldLight
+val IncomeTealBorder = IncomeEmeraldBorder
+
+val ExpenseCoral = ExpenseRose
+val ExpenseCoralLight = ExpenseRoseLight
+val ExpenseCoralBorder = ExpenseRoseBorder
+
+val GreenPrimary = PrimaryBlue
+val GreenMain = PrimaryBlueLight
+val GreenLight = PrimaryBlueLight
+val GreenContainer = PrimaryBlueContainer
+val GreenSoft = PrimaryBlueContainer
+
+val IncomeGreen = IncomeEmerald
+val IncomeGreenLight = IncomeEmeraldLight
+val IncomeGreenBorder = IncomeEmeraldBorder
+
+val ExpenseRed = ExpenseRose
+val ExpenseRedLight = ExpenseRoseLight
+val ExpenseRedBorder = ExpenseRoseBorder

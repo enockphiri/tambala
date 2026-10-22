@@ -33,13 +33,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tambala.ui.theme.ExpenseRed
-import com.example.tambala.ui.theme.ExpenseRedBorder
-import com.example.tambala.ui.theme.ExpenseRedLight
-import com.example.tambala.ui.theme.GreenContainer
-import com.example.tambala.ui.theme.IncomeGreen
-import com.example.tambala.ui.theme.IncomeGreenBorder
-import com.example.tambala.ui.theme.IncomeGreenLight
+import com.example.tambala.ui.theme.ExpenseCoral
+import com.example.tambala.ui.theme.ExpenseCoralBorder
+import com.example.tambala.ui.theme.ExpenseCoralLight
+import com.example.tambala.ui.theme.IncomeTeal
+import com.example.tambala.ui.theme.IncomeTealBorder
+import com.example.tambala.ui.theme.IncomeTealLight
+import com.example.tambala.ui.theme.IndigoContainer
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
@@ -51,10 +51,10 @@ fun TransactionItem(
     icon: ImageVector,
     isIncome: Boolean = false
 ) {
-    val cardBg = if (isIncome) IncomeGreenLight else ExpenseRedLight
-    val cardBorderColor = if (isIncome) IncomeGreenBorder else ExpenseRedBorder
-    val amountColor = if (isIncome) IncomeGreen else ExpenseRed
-    val iconBgColor = if (isIncome) GreenContainer else ExpenseRedLight
+    val cardBg = if (isIncome) IncomeTealLight else ExpenseCoralLight
+    val cardBorderColor = if (isIncome) IncomeTealBorder else ExpenseCoralBorder
+    val amountColor = if (isIncome) IncomeTeal else ExpenseCoral
+    val iconBgColor = if (isIncome) IndigoContainer else ExpenseCoralLight
     val badgeLabel = if (isIncome) "INCOME" else "EXPENSE"
 
     Card(

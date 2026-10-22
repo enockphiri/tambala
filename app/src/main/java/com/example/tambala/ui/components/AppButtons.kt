@@ -18,16 +18,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tambala.ui.theme.ExpenseRed
-import com.example.tambala.ui.theme.GreenPrimary
-import com.example.tambala.ui.theme.IncomeGreen
+import com.example.tambala.ui.theme.ExpenseRose
+import com.example.tambala.ui.theme.IncomeEmerald
+import com.example.tambala.ui.theme.PrimaryBlue
 
 @Composable
 fun PrimaryButton(
     text: String,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
-    containerColor: Color = GreenPrimary,
+    containerColor: Color = PrimaryBlue,
     contentColor: Color = Color.White
 ) {
     Button(
@@ -62,7 +62,7 @@ fun ExpenseButton(
             .height(52.dp),
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = ExpenseRed,
+            containerColor = ExpenseRose,
             contentColor = Color.White
         )
     ) {
@@ -87,7 +87,7 @@ fun IncomeButton(
             .height(52.dp),
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = IncomeGreen,
+            containerColor = IncomeEmerald,
             contentColor = Color.White
         )
     ) {
@@ -104,7 +104,7 @@ fun SecondaryButton(
     text: String,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
-    contentColor: Color = GreenPrimary
+    contentColor: Color = PrimaryBlue
 ) {
     OutlinedButton(
         onClick = onClick,

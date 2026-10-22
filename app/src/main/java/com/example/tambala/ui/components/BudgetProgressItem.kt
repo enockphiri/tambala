@@ -32,10 +32,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.theme.CardBorder
-import com.example.tambala.ui.theme.ExpenseRed
-import com.example.tambala.ui.theme.GreenContainer
-import com.example.tambala.ui.theme.GreenMain
-import com.example.tambala.ui.theme.GreenPrimary
+import com.example.tambala.ui.theme.ExpenseCoral
+import com.example.tambala.ui.theme.IndigoContainer
+import com.example.tambala.ui.theme.IndigoMain
+import com.example.tambala.ui.theme.IndigoPrimary
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
@@ -50,8 +50,8 @@ fun BudgetProgressItem(
     targetPerDay: String = ""
 ) {
     val barColor = when {
-        progress >= 0.9f -> ExpenseRed
-        else -> GreenMain
+        progress >= 0.9f -> ExpenseCoral
+        else -> IndigoMain
     }
 
     Card(
@@ -75,11 +75,11 @@ fun BudgetProgressItem(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = GreenPrimary,
+                    tint = IndigoPrimary,
                     modifier = Modifier
                         .size(38.dp)
                         .clip(CircleShape)
-                        .background(GreenContainer)
+                        .background(IndigoContainer)
                         .padding(8.dp)
                 )
 
@@ -103,7 +103,7 @@ fun BudgetProgressItem(
                 // Remaining amount
                 Text(
                     text = remaining,
-                    color = GreenPrimary,
+                    color = IndigoPrimary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold
                 )

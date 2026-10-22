@@ -30,9 +30,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.theme.DividerColor
-import com.example.tambala.ui.theme.ExpenseRed
-import com.example.tambala.ui.theme.GreenContainer
-import com.example.tambala.ui.theme.GreenPrimary
+import com.example.tambala.ui.theme.ExpenseCoral
+import com.example.tambala.ui.theme.IndigoContainer
+import com.example.tambala.ui.theme.IndigoPrimary
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
@@ -42,8 +42,8 @@ fun TopNavBar(
     titleColor: Color = TextPrimary,
     subtitle: String? = null,
     badgeText: String? = null,
-    badgeColor: Color = GreenPrimary,
-    badgeBgColor: Color = GreenContainer,
+    badgeColor: Color = IndigoPrimary,
+    badgeBgColor: Color = IndigoContainer,
     userInitial: String = "S",
     onNotificationClick: () -> Unit = {},
     onProfileClick: () -> Unit = {}
@@ -62,33 +62,33 @@ fun TopNavBar(
                     .padding(horizontal = 16.dp, vertical = 18.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Large User Profile Avatar Circle
+                // User Profile Avatar Circle ("S") -> Tapping opens Settings
                 Box(
                     modifier = Modifier
-                        .size(46.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
-                        .background(GreenContainer)
+                        .background(IndigoContainer)
                         .clickable { onProfileClick() },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = userInitial,
-                        color = GreenPrimary,
+                        color = IndigoPrimary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-                // Page Title + Subtitle (Larger & More Prominent)
+                // Page Title + Subtitle
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = title,
                         color = titleColor,
-                        fontSize = 24.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
                     if (subtitle != null) {
@@ -96,7 +96,7 @@ fun TopNavBar(
                         Text(
                             text = subtitle,
                             color = TextSecondary,
-                            fontSize = 13.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -111,20 +111,20 @@ fun TopNavBar(
                         Text(
                             text = badgeText,
                             color = badgeColor,
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
 
-                // Notification Bell Icon Button with Red Dot
+                // Notification Bell Icon Button
                 Box(
                     modifier = Modifier
-                        .size(42.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFF3F4F6))
+                        .background(Color(0xFFF1F5F9))
                         .clickable { onNotificationClick() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -132,16 +132,15 @@ fun TopNavBar(
                         imageVector = Icons.Outlined.Notifications,
                         contentDescription = "Notifications",
                         tint = TextPrimary,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
-                    // Notification Badge Dot
                     Box(
                         modifier = Modifier
-                            .size(9.dp)
+                            .size(8.dp)
                             .align(Alignment.TopEnd)
-                            .padding(end = 3.dp, top = 3.dp)
+                            .padding(end = 2.dp, top = 2.dp)
                             .clip(CircleShape)
-                            .background(ExpenseRed)
+                            .background(ExpenseCoral)
                     )
                 }
             }
@@ -160,14 +159,9 @@ fun TopNavBarPreview() {
     Column {
         TopNavBar(
             title = "Tambala",
-            titleColor = GreenPrimary,
+            titleColor = IndigoPrimary,
             subtitle = "Semester 1 (2024/2025)",
             badgeText = "73 days left"
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        TopNavBar(
-            title = "Budgets",
-            subtitle = "November 2024"
         )
     }
 }

@@ -25,8 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.theme.DividerColor
-import com.example.tambala.ui.theme.GreenContainer
-import com.example.tambala.ui.theme.GreenPrimary
+import com.example.tambala.ui.theme.IndigoContainer
+import com.example.tambala.ui.theme.IndigoPrimary
 import com.example.tambala.ui.theme.NavUnselected
 
 data class BottomNavItem(
@@ -80,11 +80,11 @@ fun BottomNavBar(
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = GreenPrimary,
-                            selectedTextColor = GreenPrimary,
+                            selectedIconColor = IndigoPrimary,
+                            selectedTextColor = IndigoPrimary,
                             unselectedIconColor = NavUnselected,
                             unselectedTextColor = NavUnselected,
-                            indicatorColor = GreenContainer
+                            indicatorColor = IndigoContainer
                         )
                     )
                 }

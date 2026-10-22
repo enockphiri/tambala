@@ -31,7 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.theme.CardBorder
-import com.example.tambala.ui.theme.GreenPrimary
+import com.example.tambala.ui.theme.IndigoContainer
+import com.example.tambala.ui.theme.IndigoPrimary
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
@@ -41,7 +42,6 @@ fun AccountItem(
     subtitle: String,
     balance: String,
     icon: ImageVector,
-    iconBackground: Color,
     badge: String = ""
 ) {
     Card(
@@ -63,11 +63,11 @@ fun AccountItem(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color.White,
+                tint = IndigoPrimary,
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(iconBackground)
+                    .background(IndigoContainer)
                     .padding(9.dp)
             )
 
@@ -98,13 +98,13 @@ fun AccountItem(
                 )
                 if (badge.isNotEmpty()) {
                     Surface(
-                        color = GreenPrimary.copy(alpha = 0.1f),
+                        color = IndigoPrimary.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.padding(top = 2.dp)
                     ) {
                         Text(
                             text = badge,
-                            color = GreenPrimary,
+                            color = IndigoPrimary,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -125,7 +125,6 @@ fun AccountItemPreview() {
             subtitle = "Physical Cash",
             balance = "MK 38,500",
             icon = Icons.Default.AccountBalanceWallet,
-            iconBackground = Color(0xFF66BB6A),
             badge = "Default"
         )
         AccountItem(
@@ -133,7 +132,6 @@ fun AccountItemPreview() {
             subtitle = "Mobile Money (099...)",
             balance = "MK 125,700",
             icon = Icons.Default.PhoneAndroid,
-            iconBackground = Color(0xFF42A5F5),
             badge = "Instant"
         )
         AccountItem(
@@ -141,7 +139,6 @@ fun AccountItemPreview() {
             subtitle = "Student Visa (•••• 4892)",
             balance = "MK 150,000",
             icon = Icons.Default.AccountBalance,
-            iconBackground = Color(0xFF5C6BC0),
             badge = "Linked"
         )
     }

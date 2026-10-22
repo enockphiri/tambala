@@ -22,11 +22,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.theme.CardBorder
-import com.example.tambala.ui.theme.ExpenseRed
-import com.example.tambala.ui.theme.ExpenseRedLight
-import com.example.tambala.ui.theme.GreenContainer
-import com.example.tambala.ui.theme.GreenPrimary
-import com.example.tambala.ui.theme.IncomeGreen
+import com.example.tambala.ui.theme.ExpenseCoral
+import com.example.tambala.ui.theme.ExpenseCoralLight
+import com.example.tambala.ui.theme.IncomeTeal
+import com.example.tambala.ui.theme.IncomeTealLight
+import com.example.tambala.ui.theme.IndigoPrimary
 import com.example.tambala.ui.theme.TextSecondary
 
 @Composable
@@ -62,7 +62,7 @@ fun BalanceCard(
             // Big Balance
             Text(
                 text = balance,
-                color = GreenPrimary,
+                color = IndigoPrimary,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -74,12 +74,12 @@ fun BalanceCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Income Box (GREEN)
+                // Income Box (Teal)
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(GreenContainer)
+                        .background(IncomeTealLight)
                         .padding(12.dp)
                 ) {
                     Text(
@@ -91,18 +91,18 @@ fun BalanceCard(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = income,
-                        color = IncomeGreen,
+                        color = IncomeTeal,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                // Expenses Box (RED)
+                // Expenses Box (Coral)
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(ExpenseRedLight)
+                        .background(ExpenseCoralLight)
                         .padding(12.dp)
                 ) {
                     Text(
@@ -114,7 +114,7 @@ fun BalanceCard(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = expenses,
-                        color = ExpenseRed,
+                        color = ExpenseCoral,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
