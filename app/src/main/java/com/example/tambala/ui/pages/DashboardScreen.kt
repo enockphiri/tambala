@@ -78,12 +78,13 @@ fun DashboardScreen(
     var selectedCategory by remember { mutableStateOf(viewModel.categories.firstOrNull() ?: "Food & Dining") }
 
     var categoryExpanded by remember { mutableStateOf(false) }
+    var showNotificationsDialog by remember { mutableStateOf(false) }
 
-    // Abrupt spending alert dialog
+    // Abrupt spending immediate popup dialog
     if (viewModel.abruptAlertMessage != null) {
         AlertDialog(
             onDismissRequest = { viewModel.abruptAlertMessage = null },
-            title = { Text("⚠️ Spending Notification", fontWeight = FontWeight.Bold, color = Color(0xFFE11D48)) },
+            title = { Text("⚠️ Abrupt Spending Warning", fontWeight = FontWeight.Bold, color = Color(0xFFE11D48)) },
             text = { Text(viewModel.abruptAlertMessage ?: "") },
             confirmButton = {
                 TextButton(onClick = { viewModel.abruptAlertMessage = null }) {
@@ -93,9 +94,46 @@ fun DashboardScreen(
         )
     }
 
+    // Notifications history dialog (opened by tapping the notification bell)
+    if (showNotificationsDialog) {
+        AlertDialog(
+            onDismissRequest = { showNotificationsDialog = false },
+            title = { Text("🔔 Notifications & Alerts", fontWeight = FontWeight.Bold, color = IndigoPrimary) },
+            text = {
+                LazyColumn(
+                    modifier = Modifier.height(260.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(viewModel.notificationsList) { note ->
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC)),
+                            border = BorderStroke(1.dp, CardBorder),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = note,
+                                modifier = Modifier.padding(12.dp),
+                                fontSize = 13.sp,
+                                color = TextPrimary
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showNotificationsDialog = false }) {
+                    Text("Close", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                }
+            }
+        )
+    }
+
     if (showAddDialog) {
         AlertDialog(
-            onDismissRequest = { showAddDialog = false },
+            onDismissRequest = {
+                viewModel.validationError = null
+                showAddDialog = false
+            },
             title = {
                 Text(
                     text = if (isIncomeDialog) "Record Income" else "Log Expense",
@@ -104,43 +142,53 @@ fun DashboardScreen(
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (viewModel.validationError != null) {
+                        Text(
+                            text = viewModel.validationError ?: "",
+                            color = Color(0xFFE11D48),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                     OutlinedTextField(
                         value = titleInput,
                         onValueChange = { titleInput = it },
-                        label = { Text("Title / Note (e.g. Cafeteria)") },
+                        label = { Text(if (isIncomeDialog) "Income Source (e.g. Allowance)" else "Title / Note (e.g. Cafeteria)") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
                         value = amountInput,
                         onValueChange = { amountInput = it },
-                        label = { Text("Amount (MK)") },
+                        label = { Text("Amount (MK) *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    // Category Dropdown (Account selection removed)
-                    Text("Select Category:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                    Box {
-                        OutlinedButton(
-                            onClick = { categoryExpanded = true },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(selectedCategory)
-                        }
-                        DropdownMenu(
-                            expanded = categoryExpanded,
-                            onDismissRequest = { categoryExpanded = false }
-                        ) {
-                            viewModel.categories.forEach { cat ->
-                                DropdownMenuItem(
-                                    text = { Text(cat) },
-                                    onClick = {
-                                        selectedCategory = cat
-                                        categoryExpanded = false
-                                    }
-                                )
+                    // Only show Category Dropdown if it's an Expense (Income does not require expense category)
+                    if (!isIncomeDialog) {
+                        Text("Select Category:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        Box {
+                            OutlinedButton(
+                                onClick = { categoryExpanded = true },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(selectedCategory)
+                            }
+                            DropdownMenu(
+                                expanded = categoryExpanded,
+                                onDismissRequest = { categoryExpanded = false }
+                            ) {
+                                viewModel.categories.forEach { cat ->
+                                    DropdownMenuItem(
+                                        text = { Text(cat) },
+                                        onClick = {
+                                            selectedCategory = cat
+                                            categoryExpanded = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -149,14 +197,13 @@ fun DashboardScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val amt = amountInput.toDoubleOrNull() ?: 0.0
-                        if (titleInput.isNotBlank() && amt > 0.0) {
-                            viewModel.addTransaction(
-                                title = titleInput,
-                                amountVal = amt,
-                                isIncome = isIncomeDialog,
-                                category = selectedCategory
-                            )
+                        val success = viewModel.addTransaction(
+                            title = titleInput,
+                            amountStr = amountInput,
+                            isIncome = isIncomeDialog,
+                            category = if (isIncomeDialog) "Income" else selectedCategory
+                        )
+                        if (success) {
                             titleInput = ""
                             amountInput = ""
                             showAddDialog = false
@@ -167,7 +214,10 @@ fun DashboardScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddDialog = false }) {
+                TextButton(onClick = {
+                    viewModel.validationError = null
+                    showAddDialog = false
+                }) {
                     Text("Cancel")
                 }
             }
@@ -182,7 +232,7 @@ fun DashboardScreen(
                 subtitle = viewModel.semesterName,
                 badgeText = "${viewModel.daysLeft} days left",
                 onProfileClick = onSettingsClick,
-                onNotificationClick = { viewModel.abruptAlertMessage = "🔔 No new system alerts at this time." }
+                onNotificationClick = { showNotificationsDialog = true }
             )
         },
         bottomBar = {
@@ -232,6 +282,7 @@ fun DashboardScreen(
                     ExpenseButton(
                         text = "- Log Expense",
                         onClick = {
+                            viewModel.validationError = null
                             isIncomeDialog = false
                             showAddDialog = true
                         },
@@ -240,6 +291,7 @@ fun DashboardScreen(
                     IncomeButton(
                         text = "+ Add Income",
                         onClick = {
+                            viewModel.validationError = null
                             isIncomeDialog = true
                             showAddDialog = true
                         },

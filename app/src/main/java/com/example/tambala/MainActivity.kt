@@ -118,8 +118,7 @@ fun MainApp(initialHasSeenOnboarding: Boolean) {
         AppScreen.Analysis -> {
             AnalysisScreen(
                 viewModel = viewModel,
-                onNavigateToTab = onNavigateToTab,
-                onSettingsClick = { currentScreen = AppScreen.Settings }
+                onNavigateToTab = onNavigateToTab
             )
         }
         AppScreen.Transactions -> {

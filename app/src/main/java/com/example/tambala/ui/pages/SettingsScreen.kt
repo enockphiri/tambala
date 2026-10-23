@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,12 +18,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,6 +55,7 @@ fun SettingsScreen(
     onNavigateToTab: (Int) -> Unit = {}
 ) {
     val context = LocalContext.current
+    var semesterDropdownExpanded by remember { mutableStateOf(false) }
 
     fun showDatePicker(initialMillis: Long, onSelected: (Long) -> Unit) {
         val cal = Calendar.getInstance().apply { timeInMillis = initialMillis }
@@ -69,7 +77,7 @@ fun SettingsScreen(
         topBar = {
             TopNavBar(
                 title = "Settings",
-                subtitle = "Semester & notification preferences"
+                subtitle = "Semesters & notification preferences"
             )
         },
         bottomBar = {
@@ -84,7 +92,7 @@ fun SettingsScreen(
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            // Semester Settings Card with Calendar Date pickers & calculated remaining days
+            // Semester Configuration Card (Options 1 & 2, not written/hardcoded)
             item {
                 Card(
                     modifier = Modifier
@@ -105,26 +113,53 @@ fun SettingsScreen(
                             fontWeight = FontWeight.Bold
                         )
 
-                        OutlinedTextField(
-                            value = viewModel.semesterName,
-                            onValueChange = { viewModel.semesterName = it },
-                            label = { Text("Semester Name") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        // Start Date Picker Field
+                        // Select Semester 1 or Semester 2 via options (no hardcoded year)
                         Column {
-                            Text("Semester Start Date", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
+                            Text("Select Semester Option", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
                             Spacer(modifier = Modifier.height(4.dp))
+                            Box {
+                                OutlinedButton(
+                                    onClick = { semesterDropdownExpanded = true },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("🎓 Semester ${viewModel.activeSemesterNumber}", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                                }
+                                DropdownMenu(
+                                    expanded = semesterDropdownExpanded,
+                                    onDismissRequest = { semesterDropdownExpanded = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Semester 1") },
+                                        onClick = {
+                                            viewModel.activeSemesterNumber = 1
+                                            semesterDropdownExpanded = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Semester 2") },
+                                        onClick = {
+                                            viewModel.activeSemesterNumber = 2
+                                            semesterDropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        // Start Date Picker Field linked to active semester dates
+                        Column {
+                            Text("Semester ${viewModel.activeSemesterNumber} Start Date", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            val currentStartMillis = if (viewModel.activeSemesterNumber == 1) viewModel.sem1StartMillis else viewModel.sem2StartMillis
+                            val currentStartStr = viewModel.activeStartStr
                             OutlinedTextField(
-                                value = viewModel.startDateStr,
+                                value = currentStartStr,
                                 onValueChange = {},
                                 readOnly = true,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        showDatePicker(viewModel.startDateMillis) { millis ->
+                                        showDatePicker(currentStartMillis) { millis ->
                                             viewModel.updateStartDate(millis)
                                         }
                                     },
@@ -137,18 +172,20 @@ fun SettingsScreen(
                             )
                         }
 
-                        // End Date Picker Field
+                        // End Date Picker Field linked to active semester dates
                         Column {
-                            Text("Semester End Date", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
+                            Text("Semester ${viewModel.activeSemesterNumber} End Date", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
                             Spacer(modifier = Modifier.height(4.dp))
+                            val currentEndMillis = if (viewModel.activeSemesterNumber == 1) viewModel.sem1EndMillis else viewModel.sem2EndMillis
+                            val currentEndStr = viewModel.activeEndStr
                             OutlinedTextField(
-                                value = viewModel.endDateStr,
+                                value = currentEndStr,
                                 onValueChange = {},
                                 readOnly = true,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        showDatePicker(viewModel.endDateMillis) { millis ->
+                                        showDatePicker(currentEndMillis) { millis ->
                                             viewModel.updateEndDate(millis)
                                         }
                                     },

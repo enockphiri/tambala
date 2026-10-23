@@ -44,6 +44,7 @@ import com.example.tambala.ui.theme.ExpenseCoral
 import com.example.tambala.ui.theme.IndigoPrimary
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
+import com.example.tambala.ui.viewmodel.BudgetData
 import com.example.tambala.ui.viewmodel.FinanceViewModel
 
 @Composable
@@ -53,19 +54,32 @@ fun BudgetsScreen(
     onSettingsClick: () -> Unit = {}
 ) {
     var showLimitDialog by remember { mutableStateOf(false) }
+    var showEditLimitDialog by remember { mutableStateOf(false) }
     var selectedCategoryForLimit by remember { mutableStateOf("") }
+    var selectedBudgetToEdit by remember { mutableStateOf<BudgetData?>(null) }
     var limitInput by remember { mutableStateOf("") }
 
     if (showLimitDialog) {
         AlertDialog(
-            onDismissRequest = { showLimitDialog = false },
+            onDismissRequest = {
+                viewModel.validationError = null
+                showLimitDialog = false
+            },
             title = { Text("Set Budget Limit for '$selectedCategoryForLimit'", fontWeight = FontWeight.Bold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (viewModel.validationError != null) {
+                        Text(
+                            text = viewModel.validationError ?: "",
+                            color = Color(0xFFE11D48),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                     OutlinedTextField(
                         value = limitInput,
                         onValueChange = { limitInput = it },
-                        label = { Text("Budget Limit (MK)") },
+                        label = { Text("Budget Limit (MK) *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
@@ -75,9 +89,8 @@ fun BudgetsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val limitVal = limitInput.toDoubleOrNull() ?: 0.0
-                        if (limitVal > 0.0 && selectedCategoryForLimit.isNotBlank()) {
-                            viewModel.setBudgetLimit(selectedCategoryForLimit, limitVal)
+                        val success = viewModel.setBudgetLimit(selectedCategoryForLimit, limitInput)
+                        if (success) {
                             limitInput = ""
                             selectedCategoryForLimit = ""
                             showLimitDialog = false
@@ -88,7 +101,67 @@ fun BudgetsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showLimitDialog = false }) {
+                TextButton(
+                    onClick = {
+                        viewModel.validationError = null
+                        showLimitDialog = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showEditLimitDialog && selectedBudgetToEdit != null) {
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.validationError = null
+                showEditLimitDialog = false
+            },
+            title = { Text("Edit Budget Limit for '${selectedBudgetToEdit!!.title}'", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (viewModel.validationError != null) {
+                        Text(
+                            text = viewModel.validationError ?: "",
+                            color = Color(0xFFE11D48),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    OutlinedTextField(
+                        value = limitInput,
+                        onValueChange = { limitInput = it },
+                        label = { Text("New Budget Limit (MK) *") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val success = viewModel.setBudgetLimit(selectedBudgetToEdit!!.title, limitInput)
+                        if (success) {
+                            limitInput = ""
+                            selectedBudgetToEdit = null
+                            showEditLimitDialog = false
+                        }
+                    }
+                ) {
+                    Text("Update Limit", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.validationError = null
+                        selectedBudgetToEdit = null
+                        showEditLimitDialog = false
+                    }
+                ) {
                     Text("Cancel")
                 }
             }
@@ -106,7 +179,7 @@ fun BudgetsScreen(
             )
         },
         bottomBar = {
-            BottomNavBar(selectedIndex = 1, onItemSelected = onNavigateToTab)
+            BottomNavBar(selectedIndex = 1, onItemSelected = onNavigateToTab) // Budgets tab index = 1
         }
     ) { innerPadding ->
         LazyColumn(
@@ -165,7 +238,7 @@ fun BudgetsScreen(
             // Active Budgets Header
             item {
                 Text(
-                    text = "Active Budgets",
+                    text = "Active Budgets (Tap to Edit Limit)",
                     color = TextPrimary,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
@@ -175,7 +248,7 @@ fun BudgetsScreen(
 
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            // Active Budget Items from ViewModel
+            // Active Budget Items from ViewModel (Clickable to edit limit)
             items(viewModel.budgets) { b ->
                 BudgetProgressItem(
                     title = b.title,
@@ -184,7 +257,13 @@ fun BudgetsScreen(
                     remaining = b.remaining,
                     progress = b.progress,
                     icon = b.icon,
-                    targetPerDay = b.targetPerDay
+                    targetPerDay = b.targetPerDay,
+                    onClick = {
+                        viewModel.validationError = null
+                        selectedBudgetToEdit = b
+                        limitInput = b.rawLimit.toInt().toString()
+                        showEditLimitDialog = true
+                    }
                 )
             }
 
@@ -210,7 +289,9 @@ fun BudgetsScreen(
                     UnbudgetedItem(
                         title = cat,
                         onSetLimitClick = {
+                            viewModel.validationError = null
                             selectedCategoryForLimit = cat
+                            limitInput = ""
                             showLimitDialog = true
                         }
                     )

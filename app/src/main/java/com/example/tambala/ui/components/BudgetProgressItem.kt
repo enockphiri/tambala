@@ -2,6 +2,7 @@ package com.example.tambala.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,7 +48,8 @@ fun BudgetProgressItem(
     remaining: String,
     progress: Float,          // value between 0f and 1f (e.g. 0.53f = 53%)
     icon: ImageVector,
-    targetPerDay: String = ""
+    targetPerDay: String = "",
+    onClick: () -> Unit = {}
 ) {
     val barColor = when {
         progress >= 0.9f -> ExpenseCoral
@@ -57,7 +59,8 @@ fun BudgetProgressItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, CardBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
