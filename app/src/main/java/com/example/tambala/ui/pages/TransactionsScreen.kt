@@ -37,23 +37,20 @@ import com.example.tambala.ui.viewmodel.FinanceViewModel
 @Composable
 fun TransactionsScreen(
     viewModel: FinanceViewModel = remember { FinanceViewModel() },
-    onNavigateToTab: (Int) -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onNavigateToTab: (Int) -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
     val filteredTransactions = viewModel.transactions.filter {
         it.title.contains(searchQuery, ignoreCase = true) ||
-                it.category.contains(searchQuery, ignoreCase = true) ||
-                it.account.contains(searchQuery, ignoreCase = true)
+                it.category.contains(searchQuery, ignoreCase = true)
     }
 
     Scaffold(
         topBar = {
             TopNavBar(
                 title = "All Transactions",
-                subtitle = "Complete student financial ledger",
-                onProfileClick = onSettingsClick
+                subtitle = "Complete student financial ledger"
             )
         },
         bottomBar = {

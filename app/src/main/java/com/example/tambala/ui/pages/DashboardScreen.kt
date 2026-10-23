@@ -76,10 +76,8 @@ fun DashboardScreen(
     var titleInput by remember { mutableStateOf("") }
     var amountInput by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(viewModel.categories.firstOrNull() ?: "Food & Dining") }
-    var selectedAccount by remember { mutableStateOf(viewModel.accounts.firstOrNull()?.name ?: "Cash in Hand") }
 
     var categoryExpanded by remember { mutableStateOf(false) }
-    var accountExpanded by remember { mutableStateOf(false) }
 
     // Abrupt spending alert dialog
     if (viewModel.abruptAlertMessage != null) {
@@ -122,7 +120,7 @@ fun DashboardScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    // Category Dropdown
+                    // Category Dropdown (Account selection removed)
                     Text("Select Category:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     Box {
                         OutlinedButton(
@@ -146,31 +144,6 @@ fun DashboardScreen(
                             }
                         }
                     }
-
-                    // Account Dropdown
-                    Text("Select Account:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                    Box {
-                        OutlinedButton(
-                            onClick = { accountExpanded = true },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(selectedAccount)
-                        }
-                        DropdownMenu(
-                            expanded = accountExpanded,
-                            onDismissRequest = { accountExpanded = false }
-                        ) {
-                            viewModel.accounts.forEach { acc ->
-                                DropdownMenuItem(
-                                    text = { Text(acc.name) },
-                                    onClick = {
-                                        selectedAccount = acc.name
-                                        accountExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
                 }
             },
             confirmButton = {
@@ -182,8 +155,7 @@ fun DashboardScreen(
                                 title = titleInput,
                                 amountVal = amt,
                                 isIncome = isIncomeDialog,
-                                category = selectedCategory,
-                                account = selectedAccount
+                                category = selectedCategory
                             )
                             titleInput = ""
                             amountInput = ""
@@ -209,7 +181,7 @@ fun DashboardScreen(
                 titleColor = IndigoPrimary,
                 subtitle = viewModel.semesterName,
                 badgeText = "${viewModel.daysLeft} days left",
-                onProfileClick = onSettingsClick, // Tapping profile avatar opens Settings
+                onProfileClick = onSettingsClick,
                 onNotificationClick = { viewModel.abruptAlertMessage = "🔔 No new system alerts at this time." }
             )
         },

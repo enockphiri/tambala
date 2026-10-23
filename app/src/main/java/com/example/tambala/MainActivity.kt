@@ -125,8 +125,7 @@ fun MainApp(initialHasSeenOnboarding: Boolean) {
         AppScreen.Transactions -> {
             TransactionsScreen(
                 viewModel = viewModel,
-                onNavigateToTab = onNavigateToTab,
-                onSettingsClick = { currentScreen = AppScreen.Settings }
+                onNavigateToTab = onNavigateToTab
             )
         }
         AppScreen.Settings -> {

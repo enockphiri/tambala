@@ -8,15 +8,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.DirectionsBus
-import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Wifi
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
 
 data class TransactionData(
@@ -27,16 +23,6 @@ data class TransactionData(
     val rawAmount: Double,
     val isIncome: Boolean,
     val category: String,
-    val account: String,
-    val icon: ImageVector
-)
-
-data class AccountData(
-    val name: String,
-    val subtitle: String,
-    val balance: String,
-    val rawBalance: Double,
-    val badge: String,
     val icon: ImageVector
 )
 
@@ -84,18 +70,11 @@ class FinanceViewModel : ViewModel() {
     var analysisFilter by mutableStateOf("Semester")
 
     val transactions = mutableStateListOf(
-        TransactionData(1L, "Campus Cafeteria Lunch", "Oct 15 • Food • Cash", "-MK 1,800", 1800.0, false, "Food & Dining", "Cash in Hand", Icons.Default.Restaurant),
-        TransactionData(2L, "Photocopying Past Exams", "Oct 15 • Printing • Cash", "-MK 300", 300.0, false, "Academic Printing", "Cash in Hand", Icons.Default.Print),
-        TransactionData(3L, "2GB Campus Data Bundle", "Oct 14 • Airtime • Airtel", "-MK 2,000", 2000.0, false, "Airtime & Data", "Airtel Money", Icons.Default.Wifi),
-        TransactionData(4L, "HESLB Semester Allowance", "Oct 12 • Grant • Bank", "+MK 250,000", 250000.0, true, "Grant", "National Bank", Icons.Default.AccountBalance),
-        TransactionData(5L, "Sibling Upkeep Support", "Oct 10 • Allowance • Airtel", "+MK 50,000", 50000.0, true, "Allowance", "Airtel Money", Icons.Default.PhoneAndroid)
-    )
-
-    val accounts = mutableStateListOf(
-        AccountData("Cash in Hand", "Physical Cash", "MK 38,500", 38500.0, "Default", Icons.Default.AccountBalanceWallet),
-        AccountData("Airtel Money", "Mobile Money (099...)", "MK 125,700", 125700.0, "Instant", Icons.Default.PhoneAndroid),
-        AccountData("National Bank", "Student Visa (•••• 4892)", "MK 150,000", 150000.0, "Linked", Icons.Default.AccountBalance),
-        AccountData("TNM Mpamba", "Mobile Money (088...)", "MK 40,000", 40000.0, "Instant", Icons.Default.PhoneAndroid)
+        TransactionData(1L, "Campus Cafeteria Lunch", "Oct 15 • Food", "-MK 1,800", 1800.0, false, "Food & Dining", Icons.Default.Restaurant),
+        TransactionData(2L, "Photocopying Past Exams", "Oct 15 • Printing", "-MK 300", 300.0, false, "Academic Printing", Icons.Default.Print),
+        TransactionData(3L, "2GB Campus Data Bundle", "Oct 14 • Airtime", "-MK 2,000", 2000.0, false, "Airtime & Data", Icons.Default.Wifi),
+        TransactionData(4L, "HESLB Semester Allowance", "Oct 12 • Grant", "+MK 250,000", 250000.0, true, "Grant", Icons.Default.Restaurant),
+        TransactionData(5L, "Sibling Upkeep Support", "Oct 10 • Allowance", "+MK 50,000", 50000.0, true, "Allowance", Icons.Default.Restaurant)
     )
 
     val budgets = mutableStateListOf(
@@ -138,7 +117,7 @@ class FinanceViewModel : ViewModel() {
         daysLeft = calculated.coerceAtLeast(1)
     }
 
-    fun addTransaction(title: String, amountVal: Double, isIncome: Boolean, category: String, account: String) {
+    fun addTransaction(title: String, amountVal: Double, isIncome: Boolean, category: String) {
         val formattedAmount = if (isIncome) "+MK %,d".format(amountVal.toInt()) else "-MK %,d".format(amountVal.toInt())
         val icon = when (category) {
             "Food & Dining" -> Icons.Default.Restaurant
@@ -148,7 +127,7 @@ class FinanceViewModel : ViewModel() {
             else -> Icons.Default.Restaurant
         }
 
-        transactions.add(0, TransactionData(System.currentTimeMillis(), title, "Today • $category • $account", formattedAmount, amountVal, isIncome, category, account, icon))
+        transactions.add(0, TransactionData(System.currentTimeMillis(), title, "Today • $category", formattedAmount, amountVal, isIncome, category, icon))
 
         if (isIncome) {
             rawIncome += amountVal
@@ -191,11 +170,6 @@ class FinanceViewModel : ViewModel() {
             balance = "MK %,d".format(rawBalance.toInt())
             transactions.remove(tx)
         }
-    }
-
-    fun addAccount(name: String, subtitle: String, balanceVal: Double, badge: String) {
-        val formatted = "MK %,d".format(balanceVal.toInt())
-        accounts.add(AccountData(name, subtitle, formatted, balanceVal, badge, Icons.Default.AccountBalanceWallet))
     }
 
     fun addCategory(categoryName: String) {
