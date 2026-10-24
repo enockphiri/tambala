@@ -12,15 +12,17 @@ class BudgetTest {
     fun setUp() {
         vm = FinanceViewModel()
         vm.budgets.clear()
+        vm.transactions.clear()
     }
 
     @Test
-    fun test_TAM_BUDGET_001_CreateBudgetForCategory() {
+    fun test_TAM_BUDGET_001_CreateBudgetForPredefinedCategory() {
         val success = vm.setBudgetLimit("Food & Dining", "20000")
         assertTrue(success)
-        val budget = vm.budgets.find { it.title == "Food & Dining" }
-        assertNotNull(budget)
-        assertEquals("MK 20,000", budget?.limit)
+        val b = vm.budgets.find { it.title == "Food & Dining" }
+        assertNotNull(b)
+        assertEquals("MK 20,000", b?.limit)
+        assertEquals("MK 0", b?.spent)
     }
 
     @Test
@@ -35,5 +37,32 @@ class BudgetTest {
         val success = vm.setBudgetLimit("Food & Dining", "0")
         assertFalse(success)
         assertEquals("Enter a limit greater than 0", vm.validationError)
+    }
+
+    @Test
+    fun test_TAM_BUDGET_004_BudgetSpentAndRemainingUpdateAfterExpense() {
+        vm.setBudgetLimit("Food & Dining", "20000")
+        vm.addTransaction("Lunch", "3000", false, "Food & Dining", System.currentTimeMillis(), "Today")
+        val b = vm.budgets.find { it.title == "Food & Dining" }
+        assertEquals("MK 3,000", b?.spent)
+        assertEquals("MK 17,000 left", b?.remaining)
+    }
+
+    @Test
+    fun test_TAM_BUDGET_005_SpendingEqualToBudgetLimit() {
+        vm.setBudgetLimit("Food & Dining", "20000")
+        vm.addTransaction("Groceries", "20000", false, "Food & Dining", System.currentTimeMillis(), "Today")
+        val b = vm.budgets.find { it.title == "Food & Dining" }
+        assertEquals("MK 20,000", b?.spent)
+        assertEquals("MK 0 left", b?.remaining)
+    }
+
+    @Test
+    fun test_TAM_BUDGET_006_EditBudgetLimit() {
+        vm.setBudgetLimit("Food & Dining", "20000")
+        val success = vm.setBudgetLimit("Food & Dining", "25000")
+        assertTrue(success)
+        val b = vm.budgets.find { it.title == "Food & Dining" }
+        assertEquals("MK 25,000", b?.limit)
     }
 }

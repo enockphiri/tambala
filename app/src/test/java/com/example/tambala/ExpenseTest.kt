@@ -26,6 +26,7 @@ class ExpenseTest {
         assertTrue(success)
         assertEquals("-MK 2,500", vm.totalExpenses)
         assertEquals("MK 47,500", vm.balance)
+        assertEquals("Lunch", vm.transactions.first().title)
     }
 
     @Test

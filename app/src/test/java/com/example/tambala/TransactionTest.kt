@@ -27,6 +27,7 @@ class TransactionTest {
         val success = vm.editTransaction(txId, "Lunch", "3000")
         assertTrue(success)
         assertEquals("-MK 3,000", vm.totalExpenses)
+        assertEquals("MK 47,000", vm.balance)
     }
 
     @Test
@@ -42,5 +43,7 @@ class TransactionTest {
         val txId = vm.transactions.first().id
         vm.deleteTransaction(txId)
         assertEquals(0, vm.transactions.size)
+        assertEquals("-MK 0", vm.totalExpenses)
+        assertEquals("MK 50,000", vm.balance)
     }
 }

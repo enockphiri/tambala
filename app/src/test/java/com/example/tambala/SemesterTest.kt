@@ -14,7 +14,14 @@ class SemesterTest {
     }
 
     @Test
-    fun test_TAM_SEMESTER_004_SetPastEndDateRejected() {
+    fun test_TAM_SEMESTER_001_SetSemesterEndDate() {
+        val futureDate = System.currentTimeMillis() + 60L * 24 * 3600 * 1000
+        vm.updateEndDate(futureDate)
+        assertNull(vm.validationError)
+    }
+
+    @Test
+    fun test_TAM_SEMESTER_004_SetSemesterEndDateInPast() {
         val pastDate = System.currentTimeMillis() - 86400000L * 2
         vm.updateEndDate(pastDate)
         assertEquals("End date cannot be in the past. Please choose a future date.", vm.validationError)

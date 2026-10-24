@@ -27,6 +27,7 @@ class IncomeTest {
         assertEquals(1, vm.transactions.size)
         assertEquals("+MK 50,000", vm.totalIncome)
         assertEquals("MK 50,000", vm.balance)
+        assertEquals("Start of semester", vm.transactions.first().title)
     }
 
     @Test
