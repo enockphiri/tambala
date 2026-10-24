@@ -90,11 +90,11 @@ class FinanceViewModel : ViewModel() {
     )
 
     val transactions = mutableStateListOf(
-        TransactionData(1L, System.currentTimeMillis(), "Lunch", "Food & Dining", "-MK 2,500", 2500.0, false, "Food & Dining", "October", Icons.Default.Restaurant),
-        TransactionData(2L, System.currentTimeMillis(), "Photocopying Past Exams", "Academic Printing", "-MK 300", 300.0, false, "Academic Printing", "October", Icons.Default.Print),
-        TransactionData(3L, System.currentTimeMillis(), "2GB Campus Data Bundle", "Airtime & Data", "-MK 2,000", 2000.0, false, "Airtime & Data", "October", Icons.Default.Wifi),
-        TransactionData(4L, System.currentTimeMillis(), "Allowance", "Allowance", "+MK 50,000", 50000.0, true, "Allowance", "October", Icons.Default.Restaurant),
-        TransactionData(5L, System.currentTimeMillis(), "Side Job", "Grant", "+MK 10,000", 10000.0, true, "Grant", "October", Icons.Default.Restaurant)
+        TransactionData(1L, System.currentTimeMillis(), "Lunch", "Oct 15 • Food & Dining", "-MK 2,500", 2500.0, false, "Food & Dining", "October", Icons.Default.Restaurant),
+        TransactionData(2L, System.currentTimeMillis(), "Photocopying Past Exams", "Oct 15 • Academic Printing", "-MK 300", 300.0, false, "Academic Printing", "October", Icons.Default.Print),
+        TransactionData(3L, System.currentTimeMillis(), "2GB Campus Data Bundle", "Oct 14 • Airtime & Data", "-MK 2,000", 2000.0, false, "Airtime & Data", "October", Icons.Default.Wifi),
+        TransactionData(4L, System.currentTimeMillis(), "Allowance", "Oct 12 • Allowance", "+MK 50,000", 50000.0, true, "Allowance", "October", Icons.Default.Restaurant),
+        TransactionData(5L, System.currentTimeMillis(), "Side Job", "Oct 10 • Grant", "+MK 10,000", 10000.0, true, "Grant", "October", Icons.Default.Restaurant)
     )
 
     val budgets = mutableStateListOf(
@@ -158,7 +158,7 @@ class FinanceViewModel : ViewModel() {
         daysLeft = calculated.coerceAtLeast(1)
     }
 
-    fun addTransaction(title: String, amountStr: String, isIncome: Boolean, category: String): Boolean {
+    fun addTransaction(title: String, amountStr: String, isIncome: Boolean, category: String, dateMillis: Long, dateStr: String): Boolean {
         if (amountStr.isBlank()) {
             validationError = "Amount is required"
             return false
@@ -184,7 +184,8 @@ class FinanceViewModel : ViewModel() {
             else -> Icons.Default.Restaurant
         }
 
-        transactions.add(0, TransactionData(System.currentTimeMillis(), System.currentTimeMillis(), title.ifBlank { finalCategory }, finalCategory, formattedAmount, amountVal, isIncome, finalCategory, selectedReportMonth, icon))
+        val subtitleStr = "$dateStr • $finalCategory"
+        transactions.add(0, TransactionData(System.currentTimeMillis(), dateMillis, title.ifBlank { finalCategory }, subtitleStr, formattedAmount, amountVal, isIncome, finalCategory, selectedReportMonth, icon))
 
         if (isIncome) {
             rawIncome += amountVal
@@ -400,7 +401,7 @@ class FinanceViewModel : ViewModel() {
         val expenses = filteredExpenses
         val total = expenses.sumOf { it.rawAmount }.coerceAtLeast(1.0)
         val grouped = expenses.groupBy { it.category }
-        if (grouped.isEmpty()) return listOf(ReportItemData("No Expenses Recorded (Semester $activeSemesterNumber)", "MK 0", "0%"))
+        if (grouped.isEmpty()) return listOf(ReportItemData("No Expenses Recorded", "MK 0", "0%"))
         return grouped.map { (cat, list) ->
             val sum = list.sumOf { it.rawAmount }
             val pct = ((sum / total) * 100).toInt()
@@ -412,7 +413,7 @@ class FinanceViewModel : ViewModel() {
         val incomes = filteredInflows
         val total = incomes.sumOf { it.rawAmount }.coerceAtLeast(1.0)
         val grouped = incomes.groupBy { it.title }
-        if (grouped.isEmpty()) return listOf(ReportItemData("No Income Recorded (Semester $activeSemesterNumber)", "MK 0", "0%"))
+        if (grouped.isEmpty()) return listOf(ReportItemData("No Income Recorded", "MK 0", "0%"))
         return grouped.map { (source, list) ->
             val sum = list.sumOf { it.rawAmount }
             val pct = ((sum / total) * 100).toInt()

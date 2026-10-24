@@ -1,5 +1,6 @@
 package com.example.tambala.ui.pages
 
+import android.app.DatePickerDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,7 +61,11 @@ import com.example.tambala.ui.theme.CardBorder
 import com.example.tambala.ui.theme.IndigoContainer
 import com.example.tambala.ui.theme.IndigoPrimary
 import com.example.tambala.ui.theme.TextPrimary
+import com.example.tambala.ui.theme.TextSecondary
 import com.example.tambala.ui.viewmodel.FinanceViewModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun DashboardScreen(
@@ -71,14 +77,35 @@ fun DashboardScreen(
     onNavigateToTransactions: () -> Unit = {},
     onSettingsClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }
     var isIncomeDialog by remember { mutableStateOf(false) }
     var titleInput by remember { mutableStateOf("") }
     var amountInput by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(viewModel.categories.firstOrNull() ?: "Food & Dining") }
 
+    var txDateMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    var txDateStr by remember { mutableStateOf(SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(System.currentTimeMillis())) }
+
     var categoryExpanded by remember { mutableStateOf(false) }
     var showNotificationsDialog by remember { mutableStateOf(false) }
+
+    fun showAddTxDatePicker() {
+        val cal = Calendar.getInstance().apply { timeInMillis = txDateMillis }
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val selectedCal = Calendar.getInstance().apply {
+                    set(year, month, dayOfMonth)
+                }
+                txDateMillis = selectedCal.timeInMillis
+                txDateStr = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(selectedCal.time)
+            },
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH),
+            cal.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
 
     // Abrupt spending immediate popup dialog
     if (viewModel.abruptAlertMessage != null) {
@@ -166,7 +193,27 @@ fun DashboardScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    // Only show Category Dropdown if it's an Expense (Income does not require expense category)
+                    // Date Selection Field
+                    Column {
+                        Text("Transaction Date:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextSecondary)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedTextField(
+                            value = txDateStr,
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showAddTxDatePicker() },
+                            enabled = false,
+                            colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                                disabledTextColor = TextPrimary,
+                                disabledBorderColor = CardBorder,
+                                disabledLabelColor = TextSecondary
+                            )
+                        )
+                    }
+
+                    // Only show Category Dropdown if it's an Expense
                     if (!isIncomeDialog) {
                         Text("Select Category:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         Box {
@@ -201,7 +248,9 @@ fun DashboardScreen(
                             title = titleInput,
                             amountStr = amountInput,
                             isIncome = isIncomeDialog,
-                            category = if (isIncomeDialog) "Income" else selectedCategory
+                            category = if (isIncomeDialog) "Income" else selectedCategory,
+                            dateMillis = txDateMillis,
+                            dateStr = txDateStr
                         )
                         if (success) {
                             titleInput = ""
