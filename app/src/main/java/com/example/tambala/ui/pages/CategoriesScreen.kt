@@ -1,6 +1,7 @@
 package com.example.tambala.ui.pages
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.MaterialTheme
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,12 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
 import com.example.tambala.ui.components.TopNavBar
-import com.example.tambala.ui.theme.Background
-import com.example.tambala.ui.theme.CardBorder
-import com.example.tambala.ui.theme.IndigoContainer
-import com.example.tambala.ui.theme.IndigoPrimary
-import com.example.tambala.ui.theme.TextPrimary
-import com.example.tambala.ui.theme.TextSecondary
 import com.example.tambala.ui.viewmodel.FinanceViewModel
 
 @Composable
@@ -96,7 +91,7 @@ fun CategoriesScreen(
                         }
                     }
                 ) {
-                    Text("Add", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                    Text("Add", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 }
             },
             dismissButton = {
@@ -133,7 +128,7 @@ fun CategoriesScreen(
                         }
                     }
                 ) {
-                    Text("Save", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                    Text("Save", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 }
             },
             dismissButton = {
@@ -148,17 +143,16 @@ fun CategoriesScreen(
         topBar = {
             TopNavBar(
                 title = "Categories",
-                subtitle = "Organize your campus budget flow",
                 onProfileClick = onSettingsClick
             )
         },
         bottomBar = {
-            BottomNavBar(selectedIndex = 2, onItemSelected = onNavigateToTab) // Categories tab index = 2
+            BottomNavBar(items = tambalaBottomNavItems, selectedIndex = 2, onItemSelected = onNavigateToTab) // Categories tab index = 2
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddCategoryDialog = true },
-                containerColor = IndigoPrimary,
+                containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White,
                 shape = CircleShape,
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
@@ -174,29 +168,17 @@ fun CategoriesScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Background)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            // Section Title
-            item {
-                Text(
-                    text = "ACTIVE OUTFLOWS",
-                    color = TextSecondary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item { Spacer(modifier = Modifier.height(8.dp)) }
 
             // Categories from ViewModel with working edit and delete options
             items(viewModel.categories) { catName ->
                 CategoryItem(
                     title = catName,
-                    subtitle = "Custom campus category",
                     icon = Icons.Default.ShoppingCart,
                     onEdit = {
                         oldCategoryName = catName
@@ -215,7 +197,6 @@ fun CategoriesScreen(
 @Composable
 fun CategoryItem(
     title: String,
-    subtitle: String,
     icon: ImageVector,
     onEdit: () -> Unit = {},
     onDelete: () -> Unit = {}
@@ -225,10 +206,9 @@ fun CategoryItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, CardBorder),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            .padding(horizontal = 16.dp, vertical = 3.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -240,11 +220,11 @@ fun CategoryItem(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = IndigoPrimary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(IndigoContainer)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
                     .padding(9.dp)
             )
 
@@ -253,14 +233,9 @@ fun CategoryItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = subtitle,
-                    color = TextSecondary,
-                    fontSize = 12.sp
                 )
             }
 
@@ -269,7 +244,7 @@ fun CategoryItem(
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "More",
-                        tint = TextSecondary
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 DropdownMenu(
@@ -301,3 +276,4 @@ fun CategoryItem(
 fun CategoriesScreenPreview() {
     CategoriesScreen()
 }
+

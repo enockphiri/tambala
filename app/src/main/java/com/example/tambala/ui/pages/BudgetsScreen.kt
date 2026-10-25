@@ -1,5 +1,7 @@
 package com.example.tambala.ui.pages
 
+import androidx.compose.material3.MaterialTheme
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,12 +40,6 @@ import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
 import com.example.tambala.ui.components.BudgetProgressItem
 import com.example.tambala.ui.components.TopNavBar
-import com.example.tambala.ui.theme.Background
-import com.example.tambala.ui.theme.CardBorder
-import com.example.tambala.ui.theme.ExpenseCoral
-import com.example.tambala.ui.theme.IndigoPrimary
-import com.example.tambala.ui.theme.TextPrimary
-import com.example.tambala.ui.theme.TextSecondary
 import com.example.tambala.ui.viewmodel.BudgetData
 import com.example.tambala.ui.viewmodel.FinanceViewModel
 
@@ -71,7 +67,7 @@ fun BudgetsScreen(
                     if (viewModel.validationError != null) {
                         Text(
                             text = viewModel.validationError ?: "",
-                            color = Color(0xFFE11D48),
+                            color = MaterialTheme.colorScheme.error,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -97,7 +93,7 @@ fun BudgetsScreen(
                         }
                     }
                 ) {
-                    Text("Save Limit", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                    Text("Save Limit", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 }
             },
             dismissButton = {
@@ -125,7 +121,7 @@ fun BudgetsScreen(
                     if (viewModel.validationError != null) {
                         Text(
                             text = viewModel.validationError ?: "",
-                            color = Color(0xFFE11D48),
+                            color = MaterialTheme.colorScheme.error,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -151,7 +147,7 @@ fun BudgetsScreen(
                         }
                     }
                 ) {
-                    Text("Update Limit", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                    Text("Update Limit", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 }
             },
             dismissButton = {
@@ -174,18 +170,17 @@ fun BudgetsScreen(
                 title = "Budgets",
                 subtitle = viewModel.semesterName,
                 badgeText = "${viewModel.daysLeft} days left",
-                badgeColor = IndigoPrimary,
                 onProfileClick = onSettingsClick
             )
         },
         bottomBar = {
-            BottomNavBar(selectedIndex = 1, onItemSelected = onNavigateToTab) // Budgets tab index = 1
+            BottomNavBar(items = tambalaBottomNavItems, selectedIndex = 1, onItemSelected = onNavigateToTab) // Budgets tab index = 1
         }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Background)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -196,15 +191,15 @@ fun BudgetsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    border = BorderStroke(1.dp, CardBorder),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     shape = RoundedCornerShape(20.dp)
                 ) {
                     Column(modifier = Modifier.padding(18.dp)) {
                         Text(
                             text = "MONTHLY SNAPSHOT",
-                            color = TextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -214,19 +209,19 @@ fun BudgetsScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text("Allocated", color = TextSecondary, fontSize = 12.sp)
+                                Text("Allocated", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text("MK %,d".format(viewModel.monthlyLimit.toInt()), color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                Text("MK %,d".format(viewModel.monthlyLimit.toInt()), color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             }
                             Column {
-                                Text("Spent", color = TextSecondary, fontSize = 12.sp)
+                                Text("Spent", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text(viewModel.totalExpenses.replace("-", ""), color = ExpenseCoral, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                Text(viewModel.totalExpenses.replace("-", ""), color = MaterialTheme.colorScheme.error, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             }
                             Column {
-                                Text("Remaining", color = TextSecondary, fontSize = 12.sp)
+                                Text("Remaining", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text(viewModel.balance, color = IndigoPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                Text(viewModel.balance, color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -238,8 +233,8 @@ fun BudgetsScreen(
             // Active Budgets Header
             item {
                 Text(
-                    text = "Active Budgets (Tap to Edit Limit)",
-                    color = TextPrimary,
+                    text = "Active Budgets",
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -273,7 +268,7 @@ fun BudgetsScreen(
             item {
                 Text(
                     text = "Categories & Unbudgeted",
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -313,8 +308,8 @@ fun UnbudgetedItem(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
             .clickable { onSetLimitClick() },
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, CardBorder),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -327,13 +322,13 @@ fun UnbudgetedItem(
         ) {
             Text(
                 text = title,
-                color = TextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
             )
             Text(
                 text = "+ Set Limit",
-                color = IndigoPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -346,3 +341,4 @@ fun UnbudgetedItem(
 fun BudgetsScreenPreview() {
     BudgetsScreen()
 }
+

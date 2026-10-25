@@ -1,167 +1,81 @@
 package com.example.tambala.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.tambala.ui.theme.DividerColor
-import com.example.tambala.ui.theme.ExpenseCoral
-import com.example.tambala.ui.theme.IndigoContainer
-import com.example.tambala.ui.theme.IndigoPrimary
-import com.example.tambala.ui.theme.TextPrimary
-import com.example.tambala.ui.theme.TextSecondary
 
 @Composable
 fun TopNavBar(
     title: String,
-    titleColor: Color = TextPrimary,
+    modifier: Modifier = Modifier,
     subtitle: String? = null,
     badgeText: String? = null,
-    badgeColor: Color = IndigoPrimary,
-    badgeBgColor: Color = IndigoContainer,
-    userInitial: String = "S",
-    onNotificationClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {}
+    userInitial: String? = "S",
+    hasNotifications: Boolean = false,
+    onProfileClick: (() -> Unit)? = null,
+    onNotificationClick: (() -> Unit)? = null
 ) {
-    Surface(
-        color = Color.White,
-        shadowElevation = 3.dp,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.statusBarsPadding()
+    Surface(modifier = modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 18.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // User Profile Avatar Circle ("S") -> Tapping opens Settings
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(IndigoContainer)
-                        .clickable { onProfileClick() },
-                    contentAlignment = Alignment.Center
+            if (userInitial != null) {
+                Surface(
+                    onClick = onProfileClick ?: {},
+                    enabled = onProfileClick != null,
+                    modifier = Modifier.size(44.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
-                    Text(
-                        text = userInitial,
-                        color = IndigoPrimary,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                // Page Title + Subtitle
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = title,
-                        color = titleColor,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (subtitle != null) {
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = subtitle,
-                            color = TextSecondary,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(userInitial.take(1).uppercase(), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
                     }
-                }
-
-                // Right Badge / Status Pill
-                if (badgeText != null) {
-                    Surface(
-                        color = badgeBgColor,
-                        shape = RoundedCornerShape(20.dp)
-                    ) {
-                        Text(
-                            text = badgeText,
-                            color = badgeColor,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-
-                // Notification Bell Icon Button
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFF1F5F9))
-                        .clickable { onNotificationClick() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Notifications,
-                        contentDescription = "Notifications",
-                        tint = TextPrimary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .align(Alignment.TopEnd)
-                            .padding(end = 2.dp, top = 2.dp)
-                            .clip(CircleShape)
-                            .background(ExpenseCoral)
-                    )
                 }
             }
-
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = DividerColor
-            )
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                if (!subtitle.isNullOrBlank()) Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (!badgeText.isNullOrBlank()) {
+                Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.secondaryContainer) {
+                    Text(badgeText, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                }
+            }
+            if (onNotificationClick != null) {
+                IconButton(
+                    onClick = onNotificationClick,
+                    modifier = Modifier.semantics { contentDescription = if (hasNotifications) "Notifications, unread" else "Notifications" }
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Outlined.Notifications, contentDescription = null)
+                        if (hasNotifications) Badge(Modifier.align(Alignment.TopEnd))
+                    }
+                }
+            }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TopNavBarPreview() {
-    Column {
-        TopNavBar(
-            title = "Tambala",
-            titleColor = IndigoPrimary,
-            subtitle = "Semester 1 (2024/2025)",
-            badgeText = "73 days left"
-        )
     }
 }

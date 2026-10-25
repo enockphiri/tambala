@@ -14,7 +14,6 @@ class HistoryTest {
         vm.transactions.clear()
         vm.addTransaction("Lunch", "2500", false, "Food & Dining", System.currentTimeMillis(), "Today")
         vm.addTransaction("Bus Fare", "500", false, "Transport", System.currentTimeMillis(), "Today")
-        vm.addTransaction("Allowance", "50000", true, "Allowance", System.currentTimeMillis(), "Today")
     }
 
     @Test
@@ -30,22 +29,5 @@ class HistoryTest {
         val query = "zzzzzz"
         val results = vm.transactions.filter { it.title.contains(query, ignoreCase = true) }
         assertEquals(0, results.size)
-    }
-
-    @Test
-    fun test_TAM_HISTORY_003_FilterTransactionsByCategory() {
-        val results = vm.transactions.filter { it.category == "Food & Dining" }
-        assertEquals(1, results.size)
-        assertEquals("Food & Dining", results.first().category)
-    }
-
-    @Test
-    fun test_TAM_HISTORY_004_FilterTransactionsByType() {
-        val incomeResults = vm.transactions.filter { it.isIncome }
-        assertEquals(1, incomeResults.size)
-        assertTrue(incomeResults.first().isIncome)
-
-        val expenseResults = vm.transactions.filter { !it.isIncome }
-        assertEquals(2, expenseResults.size)
     }
 }

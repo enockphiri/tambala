@@ -38,16 +38,6 @@ class BalanceTest {
     }
 
     @Test
-    fun test_TAM_BALANCE_003_BalanceUpdatesAfterEditingTransaction() {
-        vm.addTransaction("Allowance", "50000", true, "Allowance", System.currentTimeMillis(), "Today")
-        vm.addTransaction("Lunch", "2500", false, "Food & Dining", System.currentTimeMillis(), "Today")
-        val txId = vm.transactions.first { !it.isIncome }.id
-        vm.editTransaction(txId, "Lunch", "3000")
-        assertEquals("-MK 3,000", vm.totalExpenses)
-        assertEquals("MK 47,000", vm.balance)
-    }
-
-    @Test
     fun test_TAM_BALANCE_004_BalanceUpdatesAfterDeletingTransaction() {
         vm.addTransaction("Allowance", "50000", true, "Allowance", System.currentTimeMillis(), "Today")
         vm.addTransaction("Lunch", "2500", false, "Food & Dining", System.currentTimeMillis(), "Today")

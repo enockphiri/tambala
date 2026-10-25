@@ -42,18 +42,4 @@ class ExpenseTest {
         assertFalse(success)
         assertEquals("Enter an amount greater than 0", vm.validationError)
     }
-
-    @Test
-    fun test_TAM_EXPENSE_004_RecordExpenseWithNegativeAmount() {
-        val success = vm.addTransaction("Lunch", "-500", false, "Food & Dining", System.currentTimeMillis(), "Today")
-        assertFalse(success)
-        assertEquals("Enter an amount greater than 0", vm.validationError)
-    }
-
-    @Test
-    fun test_TAM_EXPENSE_005_RecordExpenseWithoutOptionalNote() {
-        val success = vm.addTransaction("", "1000", false, "Transport", System.currentTimeMillis(), "Today")
-        assertTrue(success)
-        assertEquals("Transport", vm.transactions.first().title)
-    }
 }

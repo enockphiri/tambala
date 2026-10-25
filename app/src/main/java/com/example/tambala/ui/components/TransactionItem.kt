@@ -1,47 +1,27 @@
 package com.example.tambala.ui.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.tambala.ui.theme.ExpenseCoral
-import com.example.tambala.ui.theme.ExpenseCoralBorder
-import com.example.tambala.ui.theme.ExpenseCoralLight
-import com.example.tambala.ui.theme.IncomeTeal
-import com.example.tambala.ui.theme.IncomeTealBorder
-import com.example.tambala.ui.theme.IncomeTealLight
-import com.example.tambala.ui.theme.IndigoContainer
-import com.example.tambala.ui.theme.TextPrimary
-import com.example.tambala.ui.theme.TextSecondary
 
 @Composable
 fun TransactionItem(
@@ -49,134 +29,41 @@ fun TransactionItem(
     subtitle: String,
     amount: String,
     icon: ImageVector,
-    isIncome: Boolean = false
+    modifier: Modifier = Modifier,
+    isIncome: Boolean = false,
+    onClick: (() -> Unit)? = null
 ) {
-    val cardBg = if (isIncome) IncomeTealLight else ExpenseCoralLight
-    val cardBorderColor = if (isIncome) IncomeTealBorder else ExpenseCoralBorder
-    val amountColor = if (isIncome) IncomeTeal else ExpenseCoral
-    val iconBgColor = if (isIncome) IndigoContainer else ExpenseCoralLight
-    val badgeLabel = if (isIncome) "INCOME" else "EXPENSE"
+    val amountColor = if (isIncome) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
+    val iconContainer = if (isIncome) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.errorContainer
+    val cardModifier = modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp, vertical = 5.dp)
+        .then(
+            if (onClick != null) Modifier.clickable(onClick = onClick, role = Role.Button) else Modifier
+        )
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 5.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBg),
-        border = BorderStroke(1.dp, cardBorderColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        shape = RoundedCornerShape(16.dp)
+        modifier = cardModifier,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+            Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Icon Container
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = amountColor,
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(iconBgColor)
-                    .padding(9.dp)
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Title + Subtitle
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = title,
-                    color = TextPrimary,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = subtitle,
-                    color = TextSecondary,
-                    fontSize = 12.sp
-                )
+            Surface(modifier = Modifier.size(44.dp), shape = CircleShape, color = iconContainer) {
+                androidx.compose.material3.Icon(icon, contentDescription = null, modifier = Modifier.padding(11.dp), tint = amountColor)
             }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Amount + Tag
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = amount,
-                    color = amountColor,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Surface(
-                    color = amountColor.copy(alpha = 0.12f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        text = badgeLabel,
-                        color = amountColor,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleSmall)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text(amount, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = amountColor)
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TransactionItemPreview() {
-    Column(modifier = Modifier.padding(vertical = 10.dp)) {
-        TransactionItem(
-            title = "Campus Cafeteria Lunch",
-            subtitle = "Oct 15 • Food • Cash",
-            amount = "-MK 1,800",
-            icon = Icons.Default.Restaurant,
-            isIncome = false
-        )
-
-        TransactionItem(
-            title = "Photocopying Past Exams",
-            subtitle = "Oct 15 • Printing • Cash",
-            amount = "-MK 300",
-            icon = Icons.Default.Print,
-            isIncome = false
-        )
-
-        TransactionItem(
-            title = "2GB Campus Data Bundle",
-            subtitle = "Oct 14 • Airtime • Airtel",
-            amount = "-MK 2,000",
-            icon = Icons.Default.Wifi,
-            isIncome = false
-        )
-
-        TransactionItem(
-            title = "HESLB Semester Allowance",
-            subtitle = "Oct 12 • Grant • Bank",
-            amount = "+MK 250,000",
-            icon = Icons.Default.AccountBalance,
-            isIncome = true
-        )
-
-        TransactionItem(
-            title = "Sibling Upkeep Support",
-            subtitle = "Oct 10 • Allowance • Airtel",
-            amount = "+MK 50,000",
-            icon = Icons.Default.PhoneAndroid,
-            isIncome = true
-        )
     }
 }

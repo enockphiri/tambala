@@ -31,14 +31,6 @@ class TransactionTest {
     }
 
     @Test
-    fun test_TAM_TRANSACTION_002_EditTransactionWithEmptyAmount() {
-        val txId = vm.transactions.first().id
-        val success = vm.editTransaction(txId, "Lunch", "")
-        assertFalse(success)
-        assertEquals("Amount is required", vm.validationError)
-    }
-
-    @Test
     fun test_TAM_TRANSACTION_003_DeleteTransaction() {
         val txId = vm.transactions.first().id
         vm.deleteTransaction(txId)

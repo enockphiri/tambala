@@ -1,5 +1,7 @@
 package com.example.tambala.ui.pages
 
+import androidx.compose.material3.MaterialTheme
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +24,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,13 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
 import com.example.tambala.ui.components.TopNavBar
-import com.example.tambala.ui.theme.Background
-import com.example.tambala.ui.theme.CardBorder
-import com.example.tambala.ui.theme.ExpenseCoral
-import com.example.tambala.ui.theme.IncomeTeal
-import com.example.tambala.ui.theme.IndigoPrimary
-import com.example.tambala.ui.theme.TextPrimary
-import com.example.tambala.ui.theme.TextSecondary
 import com.example.tambala.ui.viewmodel.FinanceViewModel
 
 @Composable
@@ -62,18 +58,17 @@ fun AnalysisScreen(
     Scaffold(
         topBar = {
             TopNavBar(
-                title = "Financial Reports",
-                subtitle = "Past & Present Monthly Reports"
+                title = "Analysis"
             )
         },
         bottomBar = {
-            BottomNavBar(selectedIndex = 3, onItemSelected = onNavigateToTab)
+            BottomNavBar(items = tambalaBottomNavItems, selectedIndex = 3, onItemSelected = onNavigateToTab)
         }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Background)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -98,7 +93,7 @@ fun AnalysisScreen(
                                 )
                             },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = IndigoPrimary,
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = Color.White
                             ),
                             modifier = Modifier.weight(1f)
@@ -120,7 +115,7 @@ fun AnalysisScreen(
                             text = "Select Calendar Month (Jan - Dec):",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = TextSecondary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Box {
@@ -128,7 +123,7 @@ fun AnalysisScreen(
                                 onClick = { monthDropdownExpanded = true },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("📅 Month: ${viewModel.selectedReportMonth}", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                                Text("📅 Month: ${viewModel.selectedReportMonth}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                             }
                             DropdownMenu(
                                 expanded = monthDropdownExpanded,
@@ -157,8 +152,8 @@ fun AnalysisScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    border = BorderStroke(1.dp, CardBorder),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
                     shape = RoundedCornerShape(20.dp)
                 ) {
@@ -166,14 +161,14 @@ fun AnalysisScreen(
                         val headerLabel = if (viewModel.analysisFilter == "Month") "TOTAL ANALYZED (${viewModel.selectedReportMonth.uppercase()})" else "TOTAL ANALYZED (${viewModel.analysisFilter.uppercase()})"
                         Text(
                             text = headerLabel,
-                            color = TextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "MK %,d spent".format(viewModel.filteredSpentRaw.toInt()),
-                            color = ExpenseCoral,
+                            color = MaterialTheme.colorScheme.error,
                             fontSize = 26.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -183,21 +178,21 @@ fun AnalysisScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text("Total Inflow", color = TextSecondary, fontSize = 12.sp)
+                                Text("Total Inflow", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "+MK %,d".format(viewModel.filteredInflowRaw.toInt()),
-                                    color = IncomeTeal,
+                                    color = MaterialTheme.colorScheme.tertiary,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
                             Column {
-                                Text("Net Balance", color = TextSecondary, fontSize = 12.sp)
+                                Text("Net Balance", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = viewModel.balance,
-                                    color = TextPrimary,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -213,7 +208,7 @@ fun AnalysisScreen(
             item {
                 Text(
                     text = if (viewModel.analysisFilter == "Month") "Spending by Category (${viewModel.selectedReportMonth})" else "Spending by Category (${viewModel.analysisFilter})",
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -232,7 +227,7 @@ fun AnalysisScreen(
             item {
                 Text(
                     text = if (viewModel.analysisFilter == "Month") "Income by Source (${viewModel.selectedReportMonth})" else "Income by Source (${viewModel.analysisFilter})",
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -257,32 +252,24 @@ fun ReportCardItem(
     amount: String,
     isIncome: Boolean
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 5.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, CardBorder),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(16.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(
                 modifier = Modifier
                     .size(10.dp)
-                    .background(if (isIncome) IncomeTeal else IndigoPrimary, shape = RoundedCornerShape(50))
+                    .background(if (isIncome) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(50))
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
                 text = title,
-                color = TextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f)
@@ -290,18 +277,19 @@ fun ReportCardItem(
 
             Text(
                 text = percentage,
-                color = TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(end = 12.dp)
             )
 
             Text(
                 text = amount,
-                color = if (isIncome) IncomeTeal else TextPrimary,
+                color = if (isIncome) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     }
 }
 
@@ -310,3 +298,4 @@ fun ReportCardItem(
 fun AnalysisScreenPreview() {
     AnalysisScreen()
 }
+

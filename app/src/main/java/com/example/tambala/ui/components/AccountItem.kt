@@ -1,40 +1,30 @@
 package com.example.tambala.ui.components
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.tambala.ui.theme.CardBorder
-import com.example.tambala.ui.theme.IndigoContainer
-import com.example.tambala.ui.theme.IndigoPrimary
-import com.example.tambala.ui.theme.TextPrimary
-import com.example.tambala.ui.theme.TextSecondary
 
 @Composable
 fun AccountItem(
@@ -42,104 +32,63 @@ fun AccountItem(
     subtitle: String,
     balance: String,
     icon: ImageVector,
-    badge: String = ""
+    modifier: Modifier = Modifier,
+    badge: String? = null,
+    onClick: (() -> Unit)? = null
 ) {
+    val cardModifier = modifier
+        .fillMaxWidth()
+        .then(
+            if (onClick != null) Modifier.clickable(onClick = onClick, role = Role.Button) else Modifier
+        )
+
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, CardBorder),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(16.dp)
+        modifier = cardModifier,
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Icon
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = IndigoPrimary,
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(IndigoContainer)
-                    .padding(9.dp)
-            )
-
-            Spacer(modifier = Modifier.width(14.dp))
-
-            // Name + Subtitle
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    color = TextPrimary,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = subtitle,
-                    color = TextSecondary,
-                    fontSize = 12.sp
+            Surface(
+                modifier = Modifier.size(44.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                androidx.compose.material3.Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(10.dp)
                 )
             }
-
-            // Balance + Badge
+            Column(Modifier.weight(1f)) {
+                Text(name, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = balance,
-                    color = TextPrimary,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
+                    balance,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.semantics { contentDescription = "Balance: $balance" }
                 )
-                if (badge.isNotEmpty()) {
-                    Surface(
-                        color = IndigoPrimary.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.padding(top = 2.dp)
-                    ) {
+                if (!badge.isNullOrBlank()) {
+                    Spacer(Modifier.size(4.dp))
+                    Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primaryContainer) {
                         Text(
-                            text = badge,
-                            color = IndigoPrimary,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            badge,
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AccountItemPreview() {
-    Column {
-        AccountItem(
-            name = "Cash in Hand",
-            subtitle = "Physical Cash",
-            balance = "MK 38,500",
-            icon = Icons.Default.AccountBalanceWallet,
-            badge = "Default"
-        )
-        AccountItem(
-            name = "Airtel Money",
-            subtitle = "Mobile Money (099...)",
-            balance = "MK 125,700",
-            icon = Icons.Default.PhoneAndroid,
-            badge = "Instant"
-        )
-        AccountItem(
-            name = "National Bank",
-            subtitle = "Student Visa (•••• 4892)",
-            balance = "MK 150,000",
-            icon = Icons.Default.AccountBalance,
-            badge = "Linked"
-        )
     }
 }

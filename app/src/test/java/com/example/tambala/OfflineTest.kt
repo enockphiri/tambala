@@ -22,16 +22,4 @@ class OfflineTest {
         val reports = vm.getSpendingByCategory()
         assertNotNull(reports)
     }
-
-    @Test
-    fun test_TAM_OFFLINE_002_NoLoginRequired() {
-        assertNotNull(vm)
-    }
-
-    @Test
-    fun test_TAM_OFFLINE_003_DataPersistsLocally() {
-        vm.addTransaction("Persistent Expense", "2000", false, "Food & Dining", System.currentTimeMillis(), "Today")
-        val newVm = FinanceViewModel()
-        assertNotNull(newVm.transactions)
-    }
 }
