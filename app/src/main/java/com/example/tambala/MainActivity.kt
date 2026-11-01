@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 fun MainApp(initialHasSeenOnboarding: Boolean) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE) }
-    val viewModel = remember { FinanceViewModel() }
+    val viewModel = remember { FinanceViewModel(context.applicationContext) }
 
     var currentScreen by remember { mutableStateOf(AppScreen.Splash) }
 

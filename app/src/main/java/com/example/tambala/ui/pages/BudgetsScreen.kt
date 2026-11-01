@@ -31,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -151,14 +150,26 @@ fun BudgetsScreen(
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.validationError = null
-                        selectedBudgetToEdit = null
-                        showEditLimitDialog = false
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(
+                        onClick = {
+                            viewModel.deleteBudget(selectedBudgetToEdit!!.title)
+                            limitInput = ""
+                            selectedBudgetToEdit = null
+                            showEditLimitDialog = false
+                        }
+                    ) {
+                        Text("Delete Budget", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
                     }
-                ) {
-                    Text("Cancel")
+                    TextButton(
+                        onClick = {
+                            viewModel.validationError = null
+                            selectedBudgetToEdit = null
+                            showEditLimitDialog = false
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
                 }
             }
         )
@@ -174,7 +185,7 @@ fun BudgetsScreen(
             )
         },
         bottomBar = {
-            BottomNavBar(items = tambalaBottomNavItems, selectedIndex = 1, onItemSelected = onNavigateToTab) // Budgets tab index = 1
+            BottomNavBar(items = tambalaBottomNavItems, selectedIndex = 1, onItemSelected = onNavigateToTab)
         }
     ) { innerPadding ->
         LazyColumn(
@@ -185,14 +196,19 @@ fun BudgetsScreen(
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            // Monthly Snapshot Card
+            // Monthly Snapshot Card (Read-only summary card)
             item {
+                val isOverBudget = viewModel.rawExpenses > viewModel.monthlyLimit
+                val overAmount = viewModel.rawExpenses - viewModel.monthlyLimit
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    border = BorderStroke(
+                        1.dp,
+                        if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant
+                    ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     shape = RoundedCornerShape(20.dp)
                 ) {
@@ -203,25 +219,39 @@ fun BudgetsScreen(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
                         )
+                        if (isOverBudget) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "⚠️ Over Budget by MK %,d!".format(overAmount.toInt()),
+                                color = MaterialTheme.colorScheme.error,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text("Allocated", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                                Text("Total Upkeep", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text("MK %,d".format(viewModel.monthlyLimit.toInt()), color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                Text("MK %,d".format(viewModel.monthlyLimit.toInt()), color = MaterialTheme.colorScheme.onSurface, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Column {
+                                Text("Category Budgets", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("MK %,d".format(viewModel.totalCategoryBudgetsRaw.toInt()), color = MaterialTheme.colorScheme.secondary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                             }
                             Column {
                                 Text("Spent", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                                 Spacer(modifier = Modifier.height(2.dp))
-                                Text(viewModel.totalExpenses.replace("-", ""), color = MaterialTheme.colorScheme.error, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                            }
-                            Column {
-                                Text("Remaining", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(viewModel.balance, color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                Text(
+                                    viewModel.totalExpenses.replace("-", ""),
+                                    color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }
@@ -341,4 +371,3 @@ fun UnbudgetedItem(
 fun BudgetsScreenPreview() {
     BudgetsScreen()
 }
-

@@ -84,7 +84,7 @@ fun AnalysisScreen(
                     filters.forEach { filter ->
                         FilterChip(
                             selected = viewModel.analysisFilter == filter,
-                            onClick = { viewModel.analysisFilter = filter },
+                            onClick = { viewModel.updateAnalysisFilter(filter) },
                             label = {
                                 Text(
                                     text = filter,
@@ -133,7 +133,7 @@ fun AnalysisScreen(
                                     DropdownMenuItem(
                                         text = { Text(m, fontWeight = if (viewModel.selectedReportMonth == m) FontWeight.Bold else FontWeight.Normal) },
                                         onClick = {
-                                            viewModel.selectedReportMonth = m
+                                            viewModel.updateSelectedReportMonth(m)
                                             monthDropdownExpanded = false
                                         }
                                     )

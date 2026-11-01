@@ -68,10 +68,21 @@ fun CategoriesScreen(
 
     if (showAddCategoryDialog) {
         AlertDialog(
-            onDismissRequest = { showAddCategoryDialog = false },
+            onDismissRequest = {
+                viewModel.validationError = null
+                showAddCategoryDialog = false
+            },
             title = { Text("Add Spending Category", fontWeight = FontWeight.Bold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (viewModel.validationError != null) {
+                        Text(
+                            text = viewModel.validationError ?: "",
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                     OutlinedTextField(
                         value = categoryNameInput,
                         onValueChange = { categoryNameInput = it },
@@ -84,8 +95,8 @@ fun CategoriesScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (categoryNameInput.isNotBlank()) {
-                            viewModel.addCategory(categoryNameInput)
+                        val success = viewModel.addCategory(categoryNameInput)
+                        if (success) {
                             categoryNameInput = ""
                             showAddCategoryDialog = false
                         }
@@ -95,7 +106,12 @@ fun CategoriesScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddCategoryDialog = false }) {
+                TextButton(
+                    onClick = {
+                        viewModel.validationError = null
+                        showAddCategoryDialog = false
+                    }
+                ) {
                     Text("Cancel")
                 }
             }
@@ -104,10 +120,21 @@ fun CategoriesScreen(
 
     if (showEditDialog) {
         AlertDialog(
-            onDismissRequest = { showEditDialog = false },
+            onDismissRequest = {
+                viewModel.validationError = null
+                showEditDialog = false
+            },
             title = { Text("Edit Category Name", fontWeight = FontWeight.Bold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (viewModel.validationError != null) {
+                        Text(
+                            text = viewModel.validationError ?: "",
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                     OutlinedTextField(
                         value = editCategoryNameInput,
                         onValueChange = { editCategoryNameInput = it },
@@ -120,8 +147,8 @@ fun CategoriesScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (editCategoryNameInput.isNotBlank()) {
-                            viewModel.editCategory(oldCategoryName, editCategoryNameInput)
+                        val success = viewModel.editCategory(oldCategoryName, editCategoryNameInput)
+                        if (success) {
                             editCategoryNameInput = ""
                             oldCategoryName = ""
                             showEditDialog = false
@@ -132,7 +159,12 @@ fun CategoriesScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEditDialog = false }) {
+                TextButton(
+                    onClick = {
+                        viewModel.validationError = null
+                        showEditDialog = false
+                    }
+                ) {
                     Text("Cancel")
                 }
             }
