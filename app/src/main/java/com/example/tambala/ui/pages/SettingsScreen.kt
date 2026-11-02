@@ -1,7 +1,5 @@
 package com.example.tambala.ui.pages
 
-import androidx.compose.material3.MaterialTheme
-
 import android.app.DatePickerDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -24,7 +22,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -35,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -43,6 +41,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
 import com.example.tambala.ui.components.TopNavBar
+import com.example.tambala.ui.theme.Background
+import com.example.tambala.ui.theme.CardBorder
+import com.example.tambala.ui.theme.IndigoPrimary
+import com.example.tambala.ui.theme.TextPrimary
+import com.example.tambala.ui.theme.TextSecondary
 import com.example.tambala.ui.viewmodel.FinanceViewModel
 import java.util.Calendar
 
@@ -56,7 +59,7 @@ fun SettingsScreen(
 
     fun showDatePicker(initialMillis: Long, onSelected: (Long) -> Unit) {
         val cal = Calendar.getInstance().apply { timeInMillis = initialMillis }
-        DatePickerDialog(
+        val datePickerDialog = DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
                 val selectedCal = Calendar.getInstance().apply {
@@ -67,13 +70,17 @@ fun SettingsScreen(
             cal.get(Calendar.YEAR),
             cal.get(Calendar.MONTH),
             cal.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        )
+        // Prevent selecting past dates (reference to current date)
+        datePickerDialog.datePicker.minDate = System.currentTimeMillis() - 1000
+        datePickerDialog.show()
     }
 
     Scaffold(
         topBar = {
             TopNavBar(
-                title = "Settings"
+                title = "Settings",
+                subtitle = "Semesters & notification preferences"
             )
         },
         bottomBar = {
@@ -83,64 +90,19 @@ fun SettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(Background)
                 .padding(innerPadding)
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            // Monthly Upkeep Budget Card
+            // Semester Configuration Card (Options 1 & 2, not written/hardcoded)
             item {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text(
-                            text = "Monthly Upkeep Budget",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Set your total monthly upkeep allowance or target spending limit.",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        var monthlyInput by remember(viewModel.monthlyLimit) { mutableStateOf(viewModel.monthlyLimit.toInt().toString()) }
-                        OutlinedTextField(
-                            value = monthlyInput,
-                            onValueChange = {
-                                monthlyInput = it
-                                if (it.isNotBlank() && it.toDoubleOrNull() != null && (it.toDoubleOrNull() ?: 0.0) > 0) {
-                                    viewModel.updateMonthlyLimit(it)
-                                }
-                            },
-                            label = { Text("Monthly Upkeep Allocation (MK)") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            // Semester Configuration Card
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, CardBorder),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
@@ -149,21 +111,21 @@ fun SettingsScreen(
                     ) {
                         Text(
                             text = "Semester Configuration",
-                            color = MaterialTheme.colorScheme.primary,
+                            color = IndigoPrimary,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
 
                         // Select Semester 1 or Semester 2 via options (no hardcoded year)
                         Column {
-                            Text("Select Semester Option", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
+                            Text("Select Semester Option", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
                             Spacer(modifier = Modifier.height(4.dp))
                             Box {
                                 OutlinedButton(
                                     onClick = { semesterDropdownExpanded = true },
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("Semester ${viewModel.activeSemesterNumber}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                    Text("🎓 Semester ${viewModel.activeSemesterNumber}", fontWeight = FontWeight.Bold, color = IndigoPrimary)
                                 }
                                 DropdownMenu(
                                     expanded = semesterDropdownExpanded,
@@ -172,14 +134,14 @@ fun SettingsScreen(
                                     DropdownMenuItem(
                                         text = { Text("Semester 1") },
                                         onClick = {
-                                            viewModel.updateActiveSemester(1)
+                                            viewModel.activeSemesterNumber = 1
                                             semesterDropdownExpanded = false
                                         }
                                     )
                                     DropdownMenuItem(
                                         text = { Text("Semester 2") },
                                         onClick = {
-                                            viewModel.updateActiveSemester(2)
+                                            viewModel.activeSemesterNumber = 2
                                             semesterDropdownExpanded = false
                                         }
                                     )
@@ -189,7 +151,7 @@ fun SettingsScreen(
 
                         // Start Date Picker Field linked to active semester dates
                         Column {
-                            Text("Semester ${viewModel.activeSemesterNumber} Start Date", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
+                            Text("Semester ${viewModel.activeSemesterNumber} Start Date", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
                             Spacer(modifier = Modifier.height(4.dp))
                             val currentStartMillis = if (viewModel.activeSemesterNumber == 1) viewModel.sem1StartMillis else viewModel.sem2StartMillis
                             val currentStartStr = viewModel.activeStartStr
@@ -205,17 +167,17 @@ fun SettingsScreen(
                                         }
                                     },
                                 enabled = false,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                                    disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                                    disabledTextColor = TextPrimary,
+                                    disabledBorderColor = CardBorder,
+                                    disabledLabelColor = TextSecondary
                                 )
                             )
                         }
 
                         // End Date Picker Field linked to active semester dates
                         Column {
-                            Text("Semester ${viewModel.activeSemesterNumber} End Date", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
+                            Text("Semester ${viewModel.activeSemesterNumber} End Date", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
                             Spacer(modifier = Modifier.height(4.dp))
                             val currentEndMillis = if (viewModel.activeSemesterNumber == 1) viewModel.sem1EndMillis else viewModel.sem2EndMillis
                             val currentEndStr = viewModel.activeEndStr
@@ -231,25 +193,29 @@ fun SettingsScreen(
                                         }
                                     },
                                 enabled = false,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                                    disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                                    disabledTextColor = TextPrimary,
+                                    disabledBorderColor = CardBorder,
+                                    disabledLabelColor = TextSecondary
                                 )
                             )
                         }
 
                         // Calculated Days Remaining display
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-                                .padding(14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F5F9)),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Days remaining", fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-                            Text("${viewModel.daysLeft}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontSize = 16.sp)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(14.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Calculated Days Remaining:", fontWeight = FontWeight.SemiBold, color = TextPrimary)
+                                Text("${viewModel.daysLeft} days", fontWeight = FontWeight.Bold, color = IndigoPrimary, fontSize = 16.sp)
+                            }
                         }
                     }
                 }
@@ -263,8 +229,8 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, CardBorder),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
@@ -273,7 +239,7 @@ fun SettingsScreen(
                     ) {
                         Text(
                             text = "Abrupt Spending Alerts",
-                            color = MaterialTheme.colorScheme.primary,
+                            color = IndigoPrimary,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -284,19 +250,19 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Enable Abrupt Spending Alerts", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
-                                Text("Notify if an expense exceeds threshold", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                                Text("Enable Abrupt Spending Alerts", color = TextPrimary, fontWeight = FontWeight.Medium)
+                                Text("Notify if an expense exceeds threshold", color = TextSecondary, fontSize = 12.sp)
                             }
                             Switch(
                                 checked = viewModel.abruptNotificationEnabled,
-                                onCheckedChange = { viewModel.updateAbruptAlerts(it) }
+                                onCheckedChange = { viewModel.abruptNotificationEnabled = it }
                             )
                         }
 
                         if (viewModel.abruptNotificationEnabled) {
                             OutlinedTextField(
                                 value = viewModel.abruptThreshold.toInt().toString(),
-                                onValueChange = { viewModel.updateAbruptAlerts(viewModel.abruptNotificationEnabled, it.toDoubleOrNull() ?: viewModel.abruptThreshold) },
+                                onValueChange = { viewModel.abruptThreshold = it.toDoubleOrNull() ?: viewModel.abruptThreshold },
                                 label = { Text("Alert Threshold (MK)") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 singleLine = true,
