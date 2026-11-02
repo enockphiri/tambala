@@ -34,6 +34,7 @@ fun TopNavBar(
     badgeText: String? = null,
     userInitial: String? = "S",
     hasNotifications: Boolean = false,
+    notificationCount: Int = 0,
     onProfileClick: (() -> Unit)? = null,
     onNotificationClick: (() -> Unit)? = null
 ) {
@@ -94,15 +95,23 @@ fun TopNavBar(
                 }
             }
             if (onNotificationClick != null) {
+                val effectiveCount = if (notificationCount > 0) notificationCount else (if (hasNotifications) 1 else 0)
                 IconButton(
                     onClick = onNotificationClick,
                     modifier = Modifier.semantics {
-                        contentDescription = if (hasNotifications) "Notifications, unread" else "Notifications"
+                        contentDescription = if (effectiveCount > 0) "Notifications, $effectiveCount unread" else "Notifications"
                     }
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(Icons.Outlined.Notifications, contentDescription = null)
-                        if (hasNotifications) Badge(Modifier.align(Alignment.TopEnd))
+                        if (effectiveCount > 0) {
+                            Badge(modifier = Modifier.align(Alignment.TopEnd)) {
+                                Text(
+                                    text = if (effectiveCount > 9) "9+" else "$effectiveCount",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                        }
                     }
                 }
             }

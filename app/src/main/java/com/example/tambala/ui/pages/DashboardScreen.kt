@@ -73,7 +73,7 @@ fun DashboardScreen(
     var isIncomeDialog by remember { mutableStateOf(false) }
     var titleInput by remember { mutableStateOf("") }
     var amountInput by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(viewModel.categories.firstOrNull() ?: "Food & Dining") }
+    var selectedCategory by remember { mutableStateOf("General") }
 
     var txDateMillis by remember { mutableStateOf(System.currentTimeMillis()) }
     var txDateStr by remember { mutableStateOf(SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(System.currentTimeMillis())) }
@@ -210,18 +210,25 @@ fun DashboardScreen(
 
                     // Only show Category Dropdown if it's an Expense
                     if (!isIncomeDialog) {
-                        Text("Select Category:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Select Category (Optional):", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         Box {
                             OutlinedButton(
                                 onClick = { categoryExpanded = true },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(selectedCategory)
+                                Text(if (selectedCategory == "General") "General / Uncategorized" else selectedCategory)
                             }
                             DropdownMenu(
                                 expanded = categoryExpanded,
                                 onDismissRequest = { categoryExpanded = false }
                             ) {
+                                DropdownMenuItem(
+                                    text = { Text("General / Uncategorized") },
+                                    onClick = {
+                                        selectedCategory = "General"
+                                        categoryExpanded = false
+                                    }
+                                )
                                 viewModel.categories.forEach { cat ->
                                     DropdownMenuItem(
                                         text = { Text(cat) },
@@ -350,6 +357,8 @@ fun DashboardScreen(
                 userInitial = "S",
                 subtitle = viewModel.semesterName,
                 badgeText = "${viewModel.daysLeft} days left",
+                hasNotifications = viewModel.notificationsList.isNotEmpty(),
+                notificationCount = viewModel.notificationsList.size,
                 onProfileClick = onSettingsClick,
                 onNotificationClick = { showNotificationsDialog = true }
             )
@@ -388,6 +397,7 @@ fun DashboardScreen(
                         text = "- Log Expense",
                         onClick = {
                             viewModel.validationError = null
+                            selectedCategory = "General"
                             isIncomeDialog = false
                             showAddDialog = true
                         },
@@ -397,6 +407,7 @@ fun DashboardScreen(
                         text = "+ Add Income",
                         onClick = {
                             viewModel.validationError = null
+                            selectedCategory = "Allowance"
                             isIncomeDialog = true
                             showAddDialog = true
                         },

@@ -2,9 +2,15 @@ package com.example.tambala.ui.viewmodel
 
 import android.content.Context
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -116,12 +122,17 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
     }
 
     fun getCategoryIcon(categoryName: String): ImageVector {
-        return when (categoryName) {
-            "Food & Dining", "Food & Groceries" -> Icons.Default.Restaurant
-            "Academic Printing" -> Icons.Default.Print
-            "Transport" -> Icons.Default.DirectionsBus
-            "Airtime & Data" -> Icons.Default.Wifi
-            else -> Icons.Default.Restaurant
+        return when (categoryName.trim()) {
+            "Food & Dining", "Food & Groceries", "Food", "Groceries", "Lunch", "Dinner" -> Icons.Default.Restaurant
+            "Academic Printing", "Books", "Stationery", "School" -> Icons.Default.Print
+            "Transport", "Bus", "Taxi", "Commute" -> Icons.Default.DirectionsBus
+            "Airtime & Data", "WiFi", "Internet", "Data" -> Icons.Default.Wifi
+            "Allowance", "Income Source", "Grant", "Salary", "Side Job", "Income", "Bank Transfer" -> Icons.Default.AccountBalanceWallet
+            "Rent & Hostel", "Hostel", "Rent", "Housing" -> Icons.Default.Home
+            "Project Costs", "Project", "Laptops", "Tech" -> Icons.Default.Build
+            "Emergencies", "Health", "Medical" -> Icons.Default.MedicalServices
+            "Shopping" -> Icons.Default.ShoppingCart
+            else -> Icons.Default.Receipt
         }
     }
 
@@ -370,7 +381,11 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
 
         validationError = null
         val formattedAmount = if (isIncome) "+MK %,d".format(amountVal.toInt()) else "-MK %,d".format(amountVal.toInt())
-        val finalCategory = if (isIncome) "Income Source" else category
+        val finalCategory = if (isIncome) {
+            if (category.isNotBlank() && category != "Food & Dining" && category != "General" && category != "Income") category else "Allowance"
+        } else {
+            if (category.isBlank()) "General" else category
+        }
         val icon = getCategoryIcon(finalCategory)
 
         val subtitleStr = "$dateStr • $finalCategory"
