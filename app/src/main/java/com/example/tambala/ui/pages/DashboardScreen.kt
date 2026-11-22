@@ -32,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -84,7 +85,7 @@ fun DashboardScreen(
     var isIncomeDialog by remember { mutableStateOf(false) }
     var titleInput by remember { mutableStateOf("") }
     var amountInput by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(viewModel.categories.firstOrNull() ?: "Food & Dining") }
+    var selectedCategory by remember { mutableStateOf(viewModel.categories.firstOrNull() ?: "") }
 
     var txDateMillis by remember { mutableStateOf(System.currentTimeMillis()) }
     var txDateStr by remember { mutableStateOf(SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(System.currentTimeMillis())) }
@@ -222,25 +223,34 @@ fun DashboardScreen(
                     // Only show Category Dropdown if it's an Expense
                     if (!isIncomeDialog) {
                         Text("Select Category:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                        Box {
-                            OutlinedButton(
-                                onClick = { categoryExpanded = true },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(selectedCategory)
-                            }
-                            DropdownMenu(
-                                expanded = categoryExpanded,
-                                onDismissRequest = { categoryExpanded = false }
-                            ) {
-                                viewModel.categories.forEach { cat ->
-                                    DropdownMenuItem(
-                                        text = { Text(cat) },
-                                        onClick = {
-                                            selectedCategory = cat
-                                            categoryExpanded = false
-                                        }
-                                    )
+                        if (viewModel.categories.isEmpty()) {
+                            Text(
+                                text = "⚠️ No categories found. Please add a category first in the Categories tab.",
+                                color = Color(0xFFE11D48),
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        } else {
+                            Box {
+                                OutlinedButton(
+                                    onClick = { categoryExpanded = true },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(selectedCategory.ifEmpty { "Select category..." })
+                                }
+                                DropdownMenu(
+                                    expanded = categoryExpanded,
+                                    onDismissRequest = { categoryExpanded = false }
+                                ) {
+                                    viewModel.categories.forEach { cat ->
+                                        DropdownMenuItem(
+                                            text = { Text(cat) },
+                                            onClick = {
+                                                selectedCategory = cat
+                                                categoryExpanded = false
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -250,6 +260,14 @@ fun DashboardScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        if (!isIncomeDialog && viewModel.categories.isEmpty()) {
+                            viewModel.validationError = "Please add a category first in the Categories tab."
+                            return@TextButton
+                        }
+                        if (!isIncomeDialog && selectedCategory.isBlank()) {
+                            viewModel.validationError = "Please select a category."
+                            return@TextButton
+                        }
                         val success = viewModel.addTransaction(
                             title = titleInput,
                             amountStr = amountInput,
@@ -385,66 +403,22 @@ fun DashboardScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Background)
-                .padding(innerPadding)
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // Balance Card
+            // Balance Card (Most visually prominent)
             item {
                 BalanceCard(
                     balance = viewModel.balance,
                     income = viewModel.totalIncome,
-                    expenses = viewModel.totalExpenses
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(20.dp)) }
-
-            // Quick Actions Section Header
-            item {
-                Text(
-                    text = "Quick Actions",
-                    color = TextPrimary,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
+                    expenses = viewModel.totalExpenses,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(10.dp)) }
-
-            // Primary Action Buttons (Coral for Log Expense, Teal for Add Income)
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ExpenseButton(
-                        text = "- Log Expense",
-                        onClick = {
-                            viewModel.validationError = null
-                            isIncomeDialog = false
-                            showAddDialog = true
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    IncomeButton(
-                        text = "+ Add Income",
-                        onClick = {
-                            viewModel.validationError = null
-                            isIncomeDialog = true
-                            showAddDialog = true
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(12.dp)) }
-
-            // Quick Shortcut Row
+            // Spending Guidance Card (Daily safe spending allowance & status)
             item {
                 Card(
                     modifier = Modifier
@@ -453,12 +427,117 @@ fun DashboardScreen(
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     border = BorderStroke(1.dp, CardBorder),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Column(modifier = Modifier.padding(18.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "SPENDING GUIDANCE",
+                                color = TextSecondary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Surface(
+                                color = Color(0xFFEFF6FF),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = "${viewModel.daysLeft} days left",
+                                    color = IndigoPrimary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text("Safe Daily Allowance", color = TextSecondary, fontSize = 12.sp)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "MK %,d / day".format(viewModel.safeDailySpending.toInt()),
+                                    color = IndigoPrimary,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text("Spending Status", color = TextSecondary, fontSize = 12.sp)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                val isOver = viewModel.rawExpenses > viewModel.monthlyLimit
+                                Text(
+                                    text = if (isOver) "⚠️ Over Budget" else "✅ On Track",
+                                    color = if (isOver) Color(0xFFE11D48) else Color(0xFF059669),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Quick Actions Section
+            item {
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Text(
+                        text = "Quick Actions",
+                        color = TextPrimary,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        ExpenseButton(
+                            text = "- Log Expense",
+                            onClick = {
+                                viewModel.validationError = null
+                                isIncomeDialog = false
+                                selectedCategory = viewModel.categories.firstOrNull() ?: ""
+                                showAddDialog = true
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                        IncomeButton(
+                            text = "+ Add Income",
+                            onClick = {
+                                viewModel.validationError = null
+                                isIncomeDialog = true
+                                showAddDialog = true
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+
+            // Secondary Quick Shortcuts
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, CardBorder),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 14.dp, horizontal = 8.dp),
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -481,9 +560,7 @@ fun DashboardScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // Recent Activity Header with View All working navigation
+            // Recent Activity Header & List
             item {
                 Row(
                     modifier = Modifier
@@ -495,7 +572,7 @@ fun DashboardScreen(
                     Text(
                         text = "Recent Activity",
                         color = TextPrimary,
-                        fontSize = 17.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
@@ -508,12 +585,12 @@ fun DashboardScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-
-            // Transactions (showing up to 5 recent transactions)
             items(viewModel.transactions.take(5)) { tx ->
                 Box(
-                    modifier = Modifier.clickable { selectedTxForActions = tx }
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 2.dp)
+                        .clickable { selectedTxForActions = tx }
                 ) {
                     TransactionItem(
                         title = tx.title,
@@ -525,7 +602,7 @@ fun DashboardScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(20.dp)) }
+            item { Spacer(modifier = Modifier.height(24.dp)) }
         }
     }
 }
@@ -548,7 +625,7 @@ fun QuickActionShortcut(
             contentDescription = title,
             tint = IndigoPrimary,
             modifier = Modifier
-                .size(44.dp)
+                .size(42.dp)
                 .clip(CircleShape)
                 .background(IndigoContainer)
                 .padding(10.dp)

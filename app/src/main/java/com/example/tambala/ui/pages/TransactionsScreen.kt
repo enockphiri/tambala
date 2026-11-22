@@ -1,10 +1,12 @@
 package com.example.tambala.ui.pages
 
-import androidx.compose.material3.MaterialTheme
-
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,8 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,7 +30,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,8 +40,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
 import com.example.tambala.ui.components.TopNavBar
-import com.example.tambala.ui.components.TransactionActionsDialog
 import com.example.tambala.ui.components.TransactionItem
+import com.example.tambala.ui.theme.Background
+import com.example.tambala.ui.theme.CardBorder
+import com.example.tambala.ui.theme.IndigoPrimary
+import com.example.tambala.ui.theme.TextSecondary
 import com.example.tambala.ui.viewmodel.FinanceViewModel
 import com.example.tambala.ui.viewmodel.TransactionData
 
@@ -42,30 +54,9 @@ fun TransactionsScreen(
     onNavigateToTab: (Int) -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedTxForActions by remember { mutableStateOf<TransactionData?>(null) }
     var selectedTxToEdit by remember { mutableStateOf<TransactionData?>(null) }
     var editTitleInput by remember { mutableStateOf("") }
     var editAmountInput by remember { mutableStateOf("") }
-
-    selectedTxForActions?.let { transaction ->
-        TransactionActionsDialog(
-            title = transaction.title,
-            subtitle = transaction.subtitle,
-            amount = transaction.amount,
-            onDismiss = { selectedTxForActions = null },
-            onEdit = {
-                viewModel.validationError = null
-                editTitleInput = transaction.title
-                editAmountInput = transaction.rawAmount.toInt().toString()
-                selectedTxForActions = null
-                selectedTxToEdit = transaction
-            },
-            onDelete = {
-                viewModel.deleteTransaction(transaction.id)
-                selectedTxForActions = null
-            }
-        )
-    }
 
     if (selectedTxToEdit != null) {
         AlertDialog(
@@ -79,7 +70,7 @@ fun TransactionsScreen(
                     if (viewModel.validationError != null) {
                         Text(
                             text = viewModel.validationError ?: "",
-                            color = MaterialTheme.colorScheme.error,
+                            color = Color(0xFFE11D48),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -114,7 +105,7 @@ fun TransactionsScreen(
                         }
                     }
                 ) {
-                    Text("Save Changes", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Text("Save Changes", fontWeight = FontWeight.Bold, color = IndigoPrimary)
                 }
             },
             dismissButton = {
@@ -138,7 +129,8 @@ fun TransactionsScreen(
     Scaffold(
         topBar = {
             TopNavBar(
-                title = "Transactions"
+                title = "All Transactions",
+                subtitle = "Complete financial ledger (Tap any item to edit)"
             )
         },
         bottomBar = {
@@ -148,34 +140,64 @@ fun TransactionsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(Background)
                 .padding(innerPadding)
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Search Bar
+            // Search Bar with clean padding
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                label = { Text("Search transactions...") },
+                label = { Text("Search transactions by keyword...") },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(16.dp)
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 items(filteredTransactions, key = { it.id }) { tx ->
-                    TransactionItem(
-                        title = tx.title,
-                        subtitle = tx.subtitle,
-                        amount = tx.amount,
-                        icon = tx.icon,
-                        isIncome = tx.isIncome,
-                        onClick = { selectedTxForActions = tx }
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable {
+                                    viewModel.validationError = null
+                                    selectedTxToEdit = tx
+                                    editTitleInput = tx.title
+                                    editAmountInput = tx.rawAmount.toInt().toString()
+                                }
+                        ) {
+                            TransactionItem(
+                                title = tx.title,
+                                subtitle = tx.subtitle,
+                                amount = tx.amount,
+                                icon = tx.icon,
+                                isIncome = tx.isIncome
+                            )
+                        }
+                        IconButton(
+                            onClick = { viewModel.deleteTransaction(tx.id) }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = TextSecondary
+                            )
+                        }
+                    }
                 }
                 item { Spacer(modifier = Modifier.height(24.dp)) }
             }
@@ -188,4 +210,3 @@ fun TransactionsScreen(
 fun TransactionsScreenPreview() {
     TransactionsScreen()
 }
-

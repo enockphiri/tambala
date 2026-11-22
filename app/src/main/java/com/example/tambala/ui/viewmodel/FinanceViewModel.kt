@@ -9,10 +9,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Work
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -48,13 +53,13 @@ data class ReportItemData(
 )
 
 class FinanceViewModel : ViewModel() {
-    var balance by mutableStateOf("MK 354,200")
-    var totalIncome by mutableStateOf("+MK 450,000")
-    var totalExpenses by mutableStateOf("-MK 95,800")
+    var balance by mutableStateOf("MK 0")
+    var totalIncome by mutableStateOf("+MK 0")
+    var totalExpenses by mutableStateOf("-MK 0")
 
-    var rawBalance = 354200.0
-    var rawIncome = 450000.0
-    var rawExpenses = 95800.0
+    var rawBalance = 0.0
+    var rawIncome = 0.0
+    var rawExpenses = 0.0
 
     // Dynamic Semester configuration (1 or 2, without hardcoded years)
     var activeSemesterNumber by mutableStateOf(1) // 1 or 2
@@ -62,15 +67,21 @@ class FinanceViewModel : ViewModel() {
     val semesterName: String
         get() = "Semester $activeSemesterNumber"
 
-    var sem1StartMillis by mutableStateOf(System.currentTimeMillis() - 60L * 24 * 3600 * 1000)
-    var sem1EndMillis by mutableStateOf(System.currentTimeMillis() + 60L * 24 * 3600 * 1000)
+    var sem1StartMillis by mutableStateOf(0L)
+    var sem1EndMillis by mutableStateOf(0L)
 
-    var sem2StartMillis by mutableStateOf(System.currentTimeMillis() + 61L * 24 * 3600 * 1000)
-    var sem2EndMillis by mutableStateOf(System.currentTimeMillis() + 180L * 24 * 3600 * 1000)
+    var sem2StartMillis by mutableStateOf(0L)
+    var sem2EndMillis by mutableStateOf(0L)
 
-    var daysLeft by mutableIntStateOf(60)
+    var daysLeft by mutableIntStateOf(0)
 
-    var monthlyLimit by mutableStateOf(120000.0)
+    val safeDailySpending: Double
+        get() {
+            val days = daysLeft.coerceAtLeast(1)
+            return rawBalance / days
+        }
+
+    var monthlyLimit by mutableStateOf(0.0)
     var abruptNotificationEnabled by mutableStateOf(true)
     var abruptThreshold by mutableStateOf(10000.0)
 
@@ -126,31 +137,13 @@ class FinanceViewModel : ViewModel() {
     // Notifications history list for Abrupt Spending and System alerts
     val notificationsList = mutableStateListOf(
         "🔔 Welcome to Tambala! 100% offline student upkeep tracker is active.",
-        "💡 Tip: Set your budget limits in the Budgets tab to monitor abrupt spending."
+        "💡 Tip: Create your custom categories and add budget limits to get started."
     )
 
-    val transactions = mutableStateListOf(
-        TransactionData(1L, System.currentTimeMillis(), "Lunch", "Food & Dining", "-MK 2,500", 2500.0, false, "Food & Dining", "October", Icons.Default.Restaurant),
-        TransactionData(2L, System.currentTimeMillis(), "Photocopying Past Exams", "Academic Printing", "-MK 300", 300.0, false, "Academic Printing", "October", Icons.Default.Print),
-        TransactionData(3L, System.currentTimeMillis(), "2GB Campus Data Bundle", "Airtime & Data", "-MK 2,000", 2000.0, false, "Airtime & Data", "October", Icons.Default.Wifi),
-        TransactionData(4L, System.currentTimeMillis(), "Allowance", "Allowance", "+MK 50,000", 50000.0, true, "Allowance", "October", Icons.Default.Restaurant),
-        TransactionData(5L, System.currentTimeMillis(), "Side Job", "Grant", "+MK 10,000", 10000.0, true, "Grant", "October", Icons.Default.Restaurant)
-    )
-
-    val budgets = mutableStateListOf(
-        BudgetData("Food & Groceries", "MK 2,500", 2500.0, "MK 20,000", 20000.0, "MK 17,500 left", 0.125f, "MK 666/day", Icons.Default.Restaurant),
-        BudgetData("Transport", "MK 0", 0.0, "MK 10,000", 10000.0, "MK 10,000 left", 0f, "MK 333/day", Icons.Default.DirectionsBus)
-    )
-
-    val categories = mutableStateListOf(
-        "Food & Dining",
-        "Rent & Hostel",
-        "Academic Printing",
-        "Transport",
-        "Airtime & Data",
-        "Project Costs",
-        "Emergencies"
-    )
+    // User enters their own data from scratch (empty initial lists)
+    val transactions = mutableStateListOf<TransactionData>()
+    val budgets = mutableStateListOf<BudgetData>()
+    val categories = mutableStateListOf<String>()
 
     var abruptAlertMessage by mutableStateOf<String?>(null)
 
@@ -170,6 +163,7 @@ class FinanceViewModel : ViewModel() {
     }
 
     private fun formatDate(millis: Long): String {
+        if (millis == 0L) return "Not set (Tap to configure)"
         val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         return formatter.format(millis)
     }
@@ -204,9 +198,13 @@ class FinanceViewModel : ViewModel() {
 
     private fun recalculateDaysLeft() {
         val end = if (activeSemesterNumber == 1) sem1EndMillis else sem2EndMillis
+        if (end == 0L) {
+            daysLeft = 0
+            return
+        }
         val diff = end - System.currentTimeMillis()
         val calculated = (diff / (1000 * 60 * 60 * 24)).toInt()
-        daysLeft = calculated.coerceAtLeast(1)
+        daysLeft = calculated.coerceAtLeast(0)
     }
 
     fun addTransaction(title: String, amountStr: String, isIncome: Boolean, category: String, dateMillis: Long, dateStr: String): Boolean {
@@ -227,12 +225,21 @@ class FinanceViewModel : ViewModel() {
         validationError = null
         val formattedAmount = if (isIncome) "+MK %,d".format(amountVal.toInt()) else "-MK %,d".format(amountVal.toInt())
         val finalCategory = if (isIncome) "Income Source" else category
-        val icon = when (finalCategory) {
-            "Food & Dining" -> Icons.Default.Restaurant
-            "Academic Printing" -> Icons.Default.Print
-            "Transport" -> Icons.Default.DirectionsBus
-            "Airtime & Data" -> Icons.Default.Wifi
-            else -> Icons.Default.Restaurant
+        
+        // Proper distinct income vs expense icons
+        val icon = if (isIncome) {
+            Icons.AutoMirrored.Filled.TrendingUp
+        } else {
+            when {
+                finalCategory.lowercase().contains("food") || finalCategory.lowercase().contains("dining") -> Icons.Default.Restaurant
+                finalCategory.lowercase().contains("transport") -> Icons.Default.DirectionsBus
+                finalCategory.lowercase().contains("print") -> Icons.Default.Print
+                finalCategory.lowercase().contains("wifi") || finalCategory.lowercase().contains("data") -> Icons.Default.Wifi
+                finalCategory.lowercase().contains("hostel") || finalCategory.lowercase().contains("rent") -> Icons.Default.Home
+                finalCategory.lowercase().contains("project") -> Icons.Default.Work
+                finalCategory.lowercase().contains("emergency") -> Icons.Default.LocalHospital
+                else -> Icons.Default.Category
+            }
         }
 
         val subtitleStr = "$dateStr • $finalCategory"
@@ -451,7 +458,7 @@ class FinanceViewModel : ViewModel() {
                 "Semester" -> {
                     val start = if (activeSemesterNumber == 1) sem1StartMillis else sem2StartMillis
                     val end = if (activeSemesterNumber == 1) sem1EndMillis else sem2EndMillis
-                    transactions.filter { it.timestamp in start..end }
+                    if (start == 0L || end == 0L) transactions else transactions.filter { it.timestamp in start..end }
                 }
                 else -> transactions
             }

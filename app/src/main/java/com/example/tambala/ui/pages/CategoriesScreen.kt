@@ -1,7 +1,5 @@
 package com.example.tambala.ui.pages
 
-import androidx.compose.material3.MaterialTheme
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,8 +18,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,6 +36,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -52,6 +58,20 @@ import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
 import com.example.tambala.ui.components.TopNavBar
 import com.example.tambala.ui.viewmodel.FinanceViewModel
+
+fun getCategoryIcon(categoryName: String): ImageVector {
+    val lower = categoryName.lowercase()
+    return when {
+        lower.contains("food") || lower.contains("dining") || lower.contains("groceries") -> Icons.Default.Restaurant
+        lower.contains("transport") || lower.contains("bus") || lower.contains("taxi") -> Icons.Default.DirectionsBus
+        lower.contains("print") || lower.contains("academic") || lower.contains("book") -> Icons.Default.Print
+        lower.contains("airtime") || lower.contains("data") || lower.contains("wifi") || lower.contains("internet") -> Icons.Default.Wifi
+        lower.contains("rent") || lower.contains("hostel") || lower.contains("accommodation") -> Icons.Default.Home
+        lower.contains("project") || lower.contains("laptop") || lower.contains("stationery") -> Icons.Default.Work
+        lower.contains("emergency") || lower.contains("medical") || lower.contains("health") -> Icons.Default.LocalHospital
+        else -> Icons.Default.Category
+    }
+}
 
 @Composable
 fun CategoriesScreen(
@@ -207,11 +227,11 @@ fun CategoriesScreen(
 
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            // Categories from ViewModel with working edit and delete options
+            // Categories from ViewModel with distinct dynamic icons
             items(viewModel.categories) { catName ->
                 CategoryItem(
                     title = catName,
-                    icon = Icons.Default.ShoppingCart,
+                    icon = getCategoryIcon(catName),
                     onEdit = {
                         oldCategoryName = catName
                         editCategoryNameInput = catName
@@ -271,7 +291,7 @@ fun CategoryItem(
                 )
             }
 
-            Box {
+      Box {
                 IconButton(onClick = { menuExpanded = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
@@ -308,4 +328,3 @@ fun CategoryItem(
 fun CategoriesScreenPreview() {
     CategoriesScreen()
 }
-
