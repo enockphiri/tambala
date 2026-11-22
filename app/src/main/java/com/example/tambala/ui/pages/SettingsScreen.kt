@@ -1,6 +1,7 @@
 package com.example.tambala.ui.pages
 
 import android.app.DatePickerDialog
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,6 +48,7 @@ import com.example.tambala.ui.theme.IndigoPrimary
 import com.example.tambala.ui.theme.TextPrimary
 import com.example.tambala.ui.theme.TextSecondary
 import com.example.tambala.ui.viewmodel.FinanceViewModel
+import com.example.tambala.worker.TambalaWorkScheduler
 import java.util.Calendar
 
 @Composable
@@ -71,7 +73,6 @@ fun SettingsScreen(
             cal.get(Calendar.MONTH),
             cal.get(Calendar.DAY_OF_MONTH)
         )
-        // Prevent selecting past dates (reference to current date)
         datePickerDialog.datePicker.minDate = System.currentTimeMillis() - 1000
         datePickerDialog.show()
     }
@@ -80,7 +81,7 @@ fun SettingsScreen(
         topBar = {
             TopNavBar(
                 title = "Settings",
-                subtitle = "Semesters & notification preferences"
+                subtitle = "Semesters & background features"
             )
         },
         bottomBar = {
@@ -95,7 +96,7 @@ fun SettingsScreen(
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            // Semester Configuration Card (Options 1 & 2, not written/hardcoded)
+            // Semester Configuration Card
             item {
                 Card(
                     modifier = Modifier
@@ -116,7 +117,7 @@ fun SettingsScreen(
                             fontWeight = FontWeight.Bold
                         )
 
-                        // Select Semester 1 or Semester 2 via options (no hardcoded year)
+                        // Select Semester 1 or Semester 2
                         Column {
                             Text("Select Semester Option", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
                             Spacer(modifier = Modifier.height(4.dp))
@@ -149,7 +150,7 @@ fun SettingsScreen(
                             }
                         }
 
-                        // Start Date Picker Field linked to active semester dates
+                        // Start Date Picker
                         Column {
                             Text("Semester ${viewModel.activeSemesterNumber} Start Date", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
                             Spacer(modifier = Modifier.height(4.dp))
@@ -175,7 +176,7 @@ fun SettingsScreen(
                             )
                         }
 
-                        // End Date Picker Field linked to active semester dates
+                        // End Date Picker
                         Column {
                             Text("Semester ${viewModel.activeSemesterNumber} End Date", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
                             Spacer(modifier = Modifier.height(4.dp))
@@ -201,7 +202,7 @@ fun SettingsScreen(
                             )
                         }
 
-                        // Calculated Days Remaining display
+                        // Calculated Days Remaining
                         Card(
                             colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F5F9)),
                             modifier = Modifier.fillMaxWidth()
@@ -215,6 +216,152 @@ fun SettingsScreen(
                             ) {
                                 Text("Calculated Days Remaining:", fontWeight = FontWeight.SemiBold, color = TextPrimary)
                                 Text("${viewModel.daysLeft} days", fontWeight = FontWeight.Bold, color = IndigoPrimary, fontSize = 16.sp)
+                            }
+                        }
+                    }
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+
+            // Background Features & WorkManager Card
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, CardBorder),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Text(
+                            text = "Manager",
+                            color = IndigoPrimary,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        // 1. Daily Expense Reminder
+                        var reminderEnabled by remember {
+                            mutableStateOf(context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).getBoolean("daily_reminder_enabled", true))
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Daily Expense Reminder", color = TextPrimary, fontWeight = FontWeight.Medium)
+                                Text("Remind to log upkeep daily", color = TextSecondary, fontSize = 12.sp)
+                            }
+                            Switch(
+                                checked = reminderEnabled,
+                                onCheckedChange = {
+                                    reminderEnabled = it
+                                    context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).edit().putBoolean("daily_reminder_enabled", it).apply()
+                                    TambalaWorkScheduler.scheduleDailyReminder(context, it)
+                                }
+                            )
+                        }
+
+                        // 2. Low-Balance Monitoring
+                        var lowBalEnabled by remember {
+                            mutableStateOf(context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).getBoolean("low_balance_enabled", true))
+                        }
+                        var lowBalThreshold by remember {
+                            mutableStateOf(context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).getFloat("low_balance_threshold", 10000f).toInt().toString())
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Low-Balance Monitoring", color = TextPrimary, fontWeight = FontWeight.Medium)
+                                Text("Warn when balance drops below threshold", color = TextSecondary, fontSize = 12.sp)
+                            }
+                            Switch(
+                                checked = lowBalEnabled,
+                                onCheckedChange = {
+                                    lowBalEnabled = it
+                                    context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).edit().putBoolean("low_balance_enabled", it).apply()
+                                    TambalaWorkScheduler.scheduleLowBalanceMonitoring(context, it)
+                                }
+                            )
+                        }
+
+                        if (lowBalEnabled) {
+                            OutlinedTextField(
+                                value = lowBalThreshold,
+                                onValueChange = {
+                                    lowBalThreshold = it
+                                    val f = it.toFloatOrNull() ?: 10000f
+                                    context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).edit().putFloat("low_balance_threshold", f).apply()
+                                },
+                                label = { Text("Low-Balance Threshold (MK)") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        // 3. Automatic Local Backup
+                        var backupEnabled by remember {
+                            mutableStateOf(context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).getBoolean("auto_backup_enabled", true))
+                        }
+                        var isDailyBackup by remember {
+                            mutableStateOf(context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).getBoolean("auto_backup_daily", true))
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Automatic Local Backup", color = TextPrimary, fontWeight = FontWeight.Medium)
+                                Text("Back up financial data offline locally", color = TextSecondary, fontSize = 12.sp)
+                            }
+                            Switch(
+                                checked = backupEnabled,
+                                onCheckedChange = {
+                                    backupEnabled = it
+                                    context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).edit().putBoolean("auto_backup_enabled", it).apply()
+                                    TambalaWorkScheduler.scheduleAutoBackup(context, it, isDailyBackup)
+                                }
+                            )
+                        }
+
+                        if (backupEnabled) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Backup Frequency", color = TextPrimary, fontSize = 14.sp)
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    OutlinedButton(
+                                        onClick = {
+                                            isDailyBackup = true
+                                            context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).edit().putBoolean("auto_backup_daily", true).apply()
+                                            TambalaWorkScheduler.scheduleAutoBackup(context, true, true)
+                                        }
+                                    ) {
+                                        Text("Daily", color = if (isDailyBackup) IndigoPrimary else TextSecondary)
+                                    }
+                                    OutlinedButton(
+                                        onClick = {
+                                            isDailyBackup = false
+                                            context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE).edit().putBoolean("auto_backup_daily", false).apply()
+                                            TambalaWorkScheduler.scheduleAutoBackup(context, true, false)
+                                        }
+                                    ) {
+                                        Text("Weekly", color = if (!isDailyBackup) IndigoPrimary else TextSecondary)
+                                    }
+                                }
                             }
                         }
                     }

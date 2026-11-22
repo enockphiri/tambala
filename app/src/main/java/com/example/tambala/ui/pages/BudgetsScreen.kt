@@ -1,7 +1,5 @@
 package com.example.tambala.ui.pages
 
-import androidx.compose.material3.MaterialTheme
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +38,12 @@ import androidx.compose.ui.unit.sp
 import com.example.tambala.ui.components.BottomNavBar
 import com.example.tambala.ui.components.BudgetProgressItem
 import com.example.tambala.ui.components.TopNavBar
+import com.example.tambala.ui.theme.Background
+import com.example.tambala.ui.theme.CardBorder
+import com.example.tambala.ui.theme.ExpenseCoral
+import com.example.tambala.ui.theme.IndigoPrimary
+import com.example.tambala.ui.theme.TextPrimary
+import com.example.tambala.ui.theme.TextSecondary
 import com.example.tambala.ui.viewmodel.BudgetData
 import com.example.tambala.ui.viewmodel.FinanceViewModel
 
@@ -50,9 +55,11 @@ fun BudgetsScreen(
 ) {
     var showLimitDialog by remember { mutableStateOf(false) }
     var showEditLimitDialog by remember { mutableStateOf(false) }
+    var showMonthlyLimitDialog by remember { mutableStateOf(false) }
     var selectedCategoryForLimit by remember { mutableStateOf("") }
     var selectedBudgetToEdit by remember { mutableStateOf<BudgetData?>(null) }
     var limitInput by remember { mutableStateOf("") }
+    var monthlyLimitInput by remember { mutableStateOf("") }
 
     if (showLimitDialog) {
         AlertDialog(
@@ -66,7 +73,7 @@ fun BudgetsScreen(
                     if (viewModel.validationError != null) {
                         Text(
                             text = viewModel.validationError ?: "",
-                            color = MaterialTheme.colorScheme.error,
+                            color = Color(0xFFE11D48),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -92,7 +99,7 @@ fun BudgetsScreen(
                         }
                     }
                 ) {
-                    Text("Save Limit", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Text("Save Limit", fontWeight = FontWeight.Bold, color = IndigoPrimary)
                 }
             },
             dismissButton = {
@@ -100,6 +107,59 @@ fun BudgetsScreen(
                     onClick = {
                         viewModel.validationError = null
                         showLimitDialog = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showMonthlyLimitDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.validationError = null
+                showMonthlyLimitDialog = false
+            },
+            title = { Text("Set Total Monthly Upkeep", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (viewModel.validationError != null) {
+                        Text(
+                            text = viewModel.validationError ?: "",
+                            color = Color(0xFFE11D48),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    OutlinedTextField(
+                        value = monthlyLimitInput,
+                        onValueChange = { monthlyLimitInput = it },
+                        label = { Text("Total Monthly Upkeep (MK) *") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val success = viewModel.updateMonthlyLimit(monthlyLimitInput)
+                        if (success) {
+                            monthlyLimitInput = ""
+                            showMonthlyLimitDialog = false
+                        }
+                    }
+                ) {
+                    Text("Save Allocation", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.validationError = null
+                        showMonthlyLimitDialog = false
                     }
                 ) {
                     Text("Cancel")
@@ -120,7 +180,7 @@ fun BudgetsScreen(
                     if (viewModel.validationError != null) {
                         Text(
                             text = viewModel.validationError ?: "",
-                            color = MaterialTheme.colorScheme.error,
+                            color = Color(0xFFE11D48),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -146,30 +206,18 @@ fun BudgetsScreen(
                         }
                     }
                 ) {
-                    Text("Update Limit", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Text("Update Limit", fontWeight = FontWeight.Bold, color = IndigoPrimary)
                 }
             },
             dismissButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TextButton(
-                        onClick = {
-                            viewModel.deleteBudget(selectedBudgetToEdit!!.title)
-                            limitInput = ""
-                            selectedBudgetToEdit = null
-                            showEditLimitDialog = false
-                        }
-                    ) {
-                        Text("Delete Budget", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                TextButton(
+                    onClick = {
+                        viewModel.validationError = null
+                        selectedBudgetToEdit = null
+                        showEditLimitDialog = false
                     }
-                    TextButton(
-                        onClick = {
-                            viewModel.validationError = null
-                            selectedBudgetToEdit = null
-                            showEditLimitDialog = false
-                        }
-                    ) {
-                        Text("Cancel")
-                    }
+                ) {
+                    Text("Cancel")
                 }
             }
         )
@@ -181,6 +229,7 @@ fun BudgetsScreen(
                 title = "Budgets",
                 subtitle = viewModel.semesterName,
                 badgeText = "${viewModel.daysLeft} days left",
+                badgeColor = IndigoPrimary,
                 onProfileClick = onSettingsClick
             )
         },
@@ -191,89 +240,90 @@ fun BudgetsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(innerPadding)
+                .background(Background)
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // Monthly Snapshot Card (Read-only summary card)
+            // Monthly Snapshot Card (Clean & Spacious)
             item {
-                val isOverBudget = viewModel.rawExpenses > viewModel.monthlyLimit
-                val overAmount = viewModel.rawExpenses - viewModel.monthlyLimit
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(
-                        1.dp,
-                        if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant
-                    ),
+                        .padding(horizontal = 16.dp)
+                        .clickable {
+                            viewModel.validationError = null
+                            monthlyLimitInput = viewModel.monthlyLimit.toInt().toString()
+                            showMonthlyLimitDialog = true
+                        },
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, CardBorder),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     shape = RoundedCornerShape(20.dp)
                 ) {
-                    Column(modifier = Modifier.padding(18.dp)) {
-                        Text(
-                            text = "MONTHLY SNAPSHOT",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        if (isOverBudget) {
-                            Spacer(modifier = Modifier.height(6.dp))
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
-                                text = "⚠️ Over Budget by MK %,d!".format(overAmount.toInt()),
-                                color = MaterialTheme.colorScheme.error,
-                                fontSize = 13.sp,
+                                text = "MONTHLY SNAPSHOT",
+                                color = TextSecondary,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold
                             )
+                            Text(
+                                text = "Tap to Edit Upkeep ⚙️",
+                                color = IndigoPrimary,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text("Total Upkeep", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text("MK %,d".format(viewModel.monthlyLimit.toInt()), color = MaterialTheme.colorScheme.onSurface, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                Text("Total Upkeep", color = TextSecondary, fontSize = 12.sp)
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text("MK %,d".format(viewModel.monthlyLimit.toInt()), color = TextPrimary, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                             }
                             Column {
-                                Text("Category Budgets", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text("MK %,d".format(viewModel.totalCategoryBudgetsRaw.toInt()), color = MaterialTheme.colorScheme.secondary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                Text("Spent", color = TextSecondary, fontSize = 12.sp)
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(viewModel.totalExpenses.replace("-", ""), color = ExpenseCoral, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                             }
                             Column {
-                                Text("Spent", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    viewModel.totalExpenses.replace("-", ""),
-                                    color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                Text("Remaining", color = TextSecondary, fontSize = 12.sp)
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(viewModel.balance, color = IndigoPrimary, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(20.dp)) }
-
-            // Active Budgets Header
+            // Active Budgets Header & List (Clean, airy spacing)
             item {
-                Text(
-                    text = "Active Budgets",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Text(
+                        text = "Active Budgets",
+                        color = TextPrimary,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Tap any budget to modify its limit",
+                        color = TextSecondary,
+                        fontSize = 12.sp
+                    )
+                }
             }
 
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-
-            // Active Budget Items from ViewModel (Clickable to edit limit)
             items(viewModel.budgets) { b ->
                 BudgetProgressItem(
                     title = b.title,
@@ -292,22 +342,24 @@ fun BudgetsScreen(
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(20.dp)) }
-
-            // Unbudgeted Categories Header
+            // Unbudgeted Categories Section
             item {
-                Text(
-                    text = "Categories & Unbudgeted",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                    Text(
+                        text = "Available Categories",
+                        color = TextPrimary,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Set limits for unbudgeted categories",
+                        color = TextSecondary,
+                        fontSize = 12.sp
+                    )
+                }
             }
 
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-
-            // Categories list where user can tap "+ Set Limit"
             items(viewModel.categories) { cat ->
                 val hasBudget = viewModel.budgets.any { it.title.equals(cat, ignoreCase = true) }
                 if (!hasBudget) {
@@ -336,11 +388,10 @@ fun UnbudgetedItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
-            .clickable { onSetLimitClick() },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, CardBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -352,16 +403,18 @@ fun UnbudgetedItem(
         ) {
             Text(
                 text = title,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = TextPrimary,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
             )
-            Text(
-                text = "+ Set Limit",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold
-            )
+            TextButton(onClick = onSetLimitClick) {
+                Text(
+                    text = "+ Set Limit",
+                    color = IndigoPrimary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

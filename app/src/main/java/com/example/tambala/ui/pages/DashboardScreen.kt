@@ -1,7 +1,5 @@
 package com.example.tambala.ui.pages
 
-import androidx.compose.material3.MaterialTheme
-
 import android.app.DatePickerDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -18,8 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -38,7 +41,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,6 +57,12 @@ import com.example.tambala.ui.components.IncomeButton
 import com.example.tambala.ui.components.TopNavBar
 import com.example.tambala.ui.components.TransactionActionsDialog
 import com.example.tambala.ui.components.TransactionItem
+import com.example.tambala.ui.theme.Background
+import com.example.tambala.ui.theme.CardBorder
+import com.example.tambala.ui.theme.IndigoContainer
+import com.example.tambala.ui.theme.IndigoPrimary
+import com.example.tambala.ui.theme.TextPrimary
+import com.example.tambala.ui.theme.TextSecondary
 import com.example.tambala.ui.viewmodel.FinanceViewModel
 import com.example.tambala.ui.viewmodel.TransactionData
 import java.text.SimpleDateFormat
@@ -73,7 +84,7 @@ fun DashboardScreen(
     var isIncomeDialog by remember { mutableStateOf(false) }
     var titleInput by remember { mutableStateOf("") }
     var amountInput by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("General") }
+    var selectedCategory by remember { mutableStateOf(viewModel.categories.firstOrNull() ?: "Food & Dining") }
 
     var txDateMillis by remember { mutableStateOf(System.currentTimeMillis()) }
     var txDateStr by remember { mutableStateOf(SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(System.currentTimeMillis())) }
@@ -106,11 +117,11 @@ fun DashboardScreen(
     if (viewModel.abruptAlertMessage != null) {
         AlertDialog(
             onDismissRequest = { viewModel.abruptAlertMessage = null },
-            title = { Text("⚠️ Abrupt Spending Warning", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error) },
+            title = { Text("⚠️ Abrupt Spending Warning", fontWeight = FontWeight.Bold, color = Color(0xFFE11D48)) },
             text = { Text(viewModel.abruptAlertMessage ?: "") },
             confirmButton = {
                 TextButton(onClick = { viewModel.abruptAlertMessage = null }) {
-                    Text("OK", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Text("OK", fontWeight = FontWeight.Bold, color = IndigoPrimary)
                 }
             }
         )
@@ -120,7 +131,7 @@ fun DashboardScreen(
     if (showNotificationsDialog) {
         AlertDialog(
             onDismissRequest = { showNotificationsDialog = false },
-            title = { Text("🔔 Notifications & Alerts", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary) },
+            title = { Text("🔔 Notifications & Alerts", fontWeight = FontWeight.Bold, color = IndigoPrimary) },
             text = {
                 LazyColumn(
                     modifier = Modifier.height(260.dp),
@@ -128,15 +139,15 @@ fun DashboardScreen(
                 ) {
                     items(viewModel.notificationsList) { note ->
                         Card(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC)),
+                            border = BorderStroke(1.dp, CardBorder),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
                                 text = note,
                                 modifier = Modifier.padding(12.dp),
                                 fontSize = 13.sp,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = TextPrimary
                             )
                         }
                     }
@@ -144,7 +155,7 @@ fun DashboardScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showNotificationsDialog = false }) {
-                    Text("Close", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Text("Close", fontWeight = FontWeight.Bold, color = IndigoPrimary)
                 }
             }
         )
@@ -167,7 +178,7 @@ fun DashboardScreen(
                     if (viewModel.validationError != null) {
                         Text(
                             text = viewModel.validationError ?: "",
-                            color = MaterialTheme.colorScheme.error,
+                            color = Color(0xFFE11D48),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -190,7 +201,7 @@ fun DashboardScreen(
 
                     // Date Selection Field
                     Column {
-                        Text("Transaction Date:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Transaction Date:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextSecondary)
                         Spacer(modifier = Modifier.height(4.dp))
                         OutlinedTextField(
                             value = txDateStr,
@@ -201,34 +212,27 @@ fun DashboardScreen(
                                 .clickable { showAddTxDatePicker() },
                             enabled = false,
                             colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                                disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                                disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                disabledTextColor = TextPrimary,
+                                disabledBorderColor = CardBorder,
+                                disabledLabelColor = TextSecondary
                             )
                         )
                     }
 
                     // Only show Category Dropdown if it's an Expense
                     if (!isIncomeDialog) {
-                        Text("Select Category (Optional):", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Select Category:", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         Box {
                             OutlinedButton(
                                 onClick = { categoryExpanded = true },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(if (selectedCategory == "General") "General / Uncategorized" else selectedCategory)
+                                Text(selectedCategory)
                             }
                             DropdownMenu(
                                 expanded = categoryExpanded,
                                 onDismissRequest = { categoryExpanded = false }
                             ) {
-                                DropdownMenuItem(
-                                    text = { Text("General / Uncategorized") },
-                                    onClick = {
-                                        selectedCategory = "General"
-                                        categoryExpanded = false
-                                    }
-                                )
                                 viewModel.categories.forEach { cat ->
                                     DropdownMenuItem(
                                         text = { Text(cat) },
@@ -261,7 +265,7 @@ fun DashboardScreen(
                         }
                     }
                 ) {
-                    Text("Save", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Text("Save", fontWeight = FontWeight.Bold, color = IndigoPrimary)
                 }
             },
             dismissButton = {
@@ -301,27 +305,28 @@ fun DashboardScreen(
                 viewModel.validationError = null
                 selectedTxToEdit = null
             },
-            title = { Text("Edit transaction", fontWeight = FontWeight.Bold) },
+            title = { Text("Edit Transaction", fontWeight = FontWeight.Bold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (viewModel.validationError != null) {
                         Text(
-                            text = viewModel.validationError.orEmpty(),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
+                            text = viewModel.validationError ?: "",
+                            color = Color(0xFFE11D48),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                     OutlinedTextField(
                         value = editTitleInput,
                         onValueChange = { editTitleInput = it },
-                        label = { Text("Title / note") },
+                        label = { Text("Title / Note") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
                         value = editAmountInput,
                         onValueChange = { editAmountInput = it },
-                        label = { Text("Amount (MK)") },
+                        label = { Text("Amount (MK) *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
@@ -329,23 +334,30 @@ fun DashboardScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    val transaction = selectedTxToEdit ?: return@TextButton
-                    if (viewModel.editTransaction(
-                            id = transaction.id,
+                TextButton(
+                    onClick = {
+                        val success = viewModel.editTransaction(
+                            id = selectedTxToEdit!!.id,
                             newTitle = editTitleInput,
                             newAmountStr = editAmountInput
                         )
-                    ) {
-                        selectedTxToEdit = null
+                        if (success) {
+                            selectedTxToEdit = null
+                        }
                     }
-                }) { Text("Save") }
+                ) {
+                    Text("Save Changes", fontWeight = FontWeight.Bold, color = IndigoPrimary)
+                }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    viewModel.validationError = null
-                    selectedTxToEdit = null
-                }) { Text("Cancel") }
+                TextButton(
+                    onClick = {
+                        viewModel.validationError = null
+                        selectedTxToEdit = null
+                    }
+                ) {
+                    Text("Cancel")
+                }
             }
         )
     }
@@ -354,13 +366,15 @@ fun DashboardScreen(
         topBar = {
             TopNavBar(
                 title = "Tambala",
-                userInitial = "S",
+                titleColor = IndigoPrimary,
                 subtitle = viewModel.semesterName,
                 badgeText = "${viewModel.daysLeft} days left",
-                hasNotifications = viewModel.notificationsList.isNotEmpty(),
-                notificationCount = viewModel.notificationsList.size,
+                hasUnreadNotifications = viewModel.hasUnreadNotifications,
                 onProfileClick = onSettingsClick,
-                onNotificationClick = { showNotificationsDialog = true }
+                onNotificationClick = {
+                    viewModel.hasUnreadNotifications = false
+                    showNotificationsDialog = true
+                }
             )
         },
         bottomBar = {
@@ -370,7 +384,7 @@ fun DashboardScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(Background)
                 .padding(innerPadding)
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -384,8 +398,22 @@ fun DashboardScreen(
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-            // Primary actions
+            item { Spacer(modifier = Modifier.height(20.dp)) }
+
+            // Quick Actions Section Header
+            item {
+                Text(
+                    text = "Quick Actions",
+                    color = TextPrimary,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+
+            // Primary Action Buttons (Coral for Log Expense, Teal for Add Income)
             item {
                 Row(
                     modifier = Modifier
@@ -397,7 +425,6 @@ fun DashboardScreen(
                         text = "- Log Expense",
                         onClick = {
                             viewModel.validationError = null
-                            selectedCategory = "General"
                             isIncomeDialog = false
                             showAddDialog = true
                         },
@@ -407,7 +434,6 @@ fun DashboardScreen(
                         text = "+ Add Income",
                         onClick = {
                             viewModel.validationError = null
-                            selectedCategory = "Allowance"
                             isIncomeDialog = true
                             showAddDialog = true
                         },
@@ -416,7 +442,46 @@ fun DashboardScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(20.dp)) }
+            item { Spacer(modifier = Modifier.height(12.dp)) }
+
+            // Quick Shortcut Row
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(1.dp, CardBorder),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 14.dp, horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        QuickActionShortcut(
+                            title = "Set Budget",
+                            icon = Icons.Default.PieChart,
+                            onClick = onNavigateToBudgets
+                        )
+                        QuickActionShortcut(
+                            title = "Categories",
+                            icon = Icons.Default.Category,
+                            onClick = onNavigateToCategories
+                        )
+                        QuickActionShortcut(
+                            title = "Analytics",
+                            icon = Icons.AutoMirrored.Filled.TrendingUp,
+                            onClick = onNavigateToAnalysis
+                        )
+                    }
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(24.dp)) }
 
             // Recent Activity Header with View All working navigation
             item {
@@ -429,13 +494,13 @@ fun DashboardScreen(
                 ) {
                     Text(
                         text = "Recent Activity",
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = TextPrimary,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "View All →",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = IndigoPrimary,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.clickable { onNavigateToTransactions() }
@@ -445,20 +510,56 @@ fun DashboardScreen(
 
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            // A short list keeps the dashboard focused. Open an item for edit/delete actions.
-            items(viewModel.transactions.take(3), key = { it.id }) { tx ->
-                TransactionItem(
-                    title = tx.title,
-                    subtitle = tx.subtitle,
-                    amount = tx.amount,
-                    icon = tx.icon,
-                    isIncome = tx.isIncome,
-                    onClick = { selectedTxForActions = tx }
-                )
+            // Transactions (showing up to 5 recent transactions)
+            items(viewModel.transactions.take(5)) { tx ->
+                Box(
+                    modifier = Modifier.clickable { selectedTxForActions = tx }
+                ) {
+                    TransactionItem(
+                        title = tx.title,
+                        subtitle = tx.subtitle,
+                        amount = tx.amount,
+                        icon = tx.icon,
+                        isIncome = tx.isIncome
+                    )
+                }
             }
 
             item { Spacer(modifier = Modifier.height(20.dp)) }
         }
+    }
+}
+
+@Composable
+fun QuickActionShortcut(
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit = {}
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = title,
+            tint = IndigoPrimary,
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(IndigoContainer)
+                .padding(10.dp)
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = title,
+            color = TextPrimary,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
@@ -467,7 +568,3 @@ fun DashboardScreen(
 fun DashboardScreenPreview() {
     DashboardScreen()
 }
-
-
-
-

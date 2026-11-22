@@ -1,26 +1,19 @@
 package com.example.tambala.ui.viewmodel
 
 import android.content.Context
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.DirectionsBus
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Receipt
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
-import com.example.tambala.data.FinanceStorage
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Wifi
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
 
 data class TransactionData(
@@ -44,7 +37,7 @@ data class BudgetData(
     var rawLimit: Double,
     var remaining: String,
     var progress: Float,
-    var targetPerDay: String,
+    val targetPerDay: String,
     val icon: ImageVector
 )
 
@@ -54,16 +47,14 @@ data class ReportItemData(
     val percentage: String
 )
 
-class FinanceViewModel(context: Context? = null) : ViewModel() {
-    private val storage = FinanceStorage(context)
+class FinanceViewModel : ViewModel() {
+    var balance by mutableStateOf("MK 354,200")
+    var totalIncome by mutableStateOf("+MK 450,000")
+    var totalExpenses by mutableStateOf("-MK 95,800")
 
-    var balance by mutableStateOf("MK 0")
-    var totalIncome by mutableStateOf("+MK 0")
-    var totalExpenses by mutableStateOf("-MK 0")
-
-    var rawBalance = 0.0
-    var rawIncome = 0.0
-    var rawExpenses = 0.0
+    var rawBalance = 354200.0
+    var rawIncome = 450000.0
+    var rawExpenses = 95800.0
 
     // Dynamic Semester configuration (1 or 2, without hardcoded years)
     var activeSemesterNumber by mutableStateOf(1) // 1 or 2
@@ -77,231 +68,105 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
     var sem2StartMillis by mutableStateOf(System.currentTimeMillis() + 61L * 24 * 3600 * 1000)
     var sem2EndMillis by mutableStateOf(System.currentTimeMillis() + 180L * 24 * 3600 * 1000)
 
-    val daysLeft: Int
-        get() {
-            val end = if (activeSemesterNumber == 1) sem1EndMillis else sem2EndMillis
-            val diff = end - System.currentTimeMillis()
-            val calculated = (diff / (1000 * 60 * 60 * 24)).toInt()
-            return calculated.coerceAtLeast(1)
-        }
+    var daysLeft by mutableIntStateOf(60)
 
     var monthlyLimit by mutableStateOf(120000.0)
     var abruptNotificationEnabled by mutableStateOf(true)
     var abruptThreshold by mutableStateOf(10000.0)
 
-    // Analysis filter state ("Day", "Week", "Month", "Semester")
-    var analysisFilter by mutableStateOf("Semester")
-
-    // Jan-Dec available months for past & present reporting
-    val availableMonths = listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
-    var selectedReportMonth by mutableStateOf(SimpleDateFormat("MMMM", Locale.getDefault()).format(System.currentTimeMillis()))
-
-    // Error state for validation matching Test Cases
-    var validationError by mutableStateOf<String?>(null)
-
-    // Notifications history list for Abrupt Spending and System alerts
-    val notificationsList = mutableStateListOf<String>()
-
-    val transactions = mutableStateListOf<TransactionData>()
-
-    val budgets = mutableStateListOf<BudgetData>()
-
-    val categories = mutableStateListOf<String>()
-
-    var abruptAlertMessage by mutableStateOf<String?>(null)
-
-    init {
-        if (!storage.isInitialized()) {
-            seedDefaultData()
-            storage.setInitialized(true)
-            saveData()
-        } else {
-            loadFromStorage()
+    fun updateMonthlyLimit(limitStr: String): Boolean {
+        val limitVal = limitStr.toDoubleOrNull()
+        if (limitVal == null || limitVal <= 0.0) {
+            validationError = "Enter an allocation greater than 0"
+            return false
         }
-        recalculateTotals()
-    }
-
-    fun getCategoryIcon(categoryName: String): ImageVector {
-        return when (categoryName.trim()) {
-            "Food & Dining", "Food & Groceries", "Food", "Groceries", "Lunch", "Dinner" -> Icons.Default.Restaurant
-            "Academic Printing", "Books", "Stationery", "School" -> Icons.Default.Print
-            "Transport", "Bus", "Taxi", "Commute" -> Icons.Default.DirectionsBus
-            "Airtime & Data", "WiFi", "Internet", "Data" -> Icons.Default.Wifi
-            "Allowance", "Income Source", "Grant", "Salary", "Side Job", "Income", "Bank Transfer" -> Icons.Default.AccountBalanceWallet
-            "Rent & Hostel", "Hostel", "Rent", "Housing" -> Icons.Default.Home
-            "Project Costs", "Project", "Laptops", "Tech" -> Icons.Default.Build
-            "Emergencies", "Health", "Medical" -> Icons.Default.MedicalServices
-            "Shopping" -> Icons.Default.ShoppingCart
-            else -> Icons.Default.Receipt
-        }
-    }
-
-    fun saveData() {
-        storage.saveSettings(
-            activeSemesterNumber = activeSemesterNumber,
-            sem1StartMillis = sem1StartMillis,
-            sem1EndMillis = sem1EndMillis,
-            sem2StartMillis = sem2StartMillis,
-            sem2EndMillis = sem2EndMillis,
-            monthlyLimit = monthlyLimit,
-            abruptNotificationEnabled = abruptNotificationEnabled,
-            abruptThreshold = abruptThreshold,
-            selectedReportMonth = selectedReportMonth,
-            analysisFilter = analysisFilter
-        )
-        storage.saveCategories(categories)
-        storage.saveNotifications(notificationsList)
-        storage.saveTransactions(transactions)
-        storage.saveBudgets(budgets)
-    }
-
-    private fun seedDefaultData() {
-        activeSemesterNumber = 1
-        sem1StartMillis = System.currentTimeMillis() - 60L * 24 * 3600 * 1000
-        sem1EndMillis = System.currentTimeMillis() + 60L * 24 * 3600 * 1000
-        sem2StartMillis = System.currentTimeMillis() + 61L * 24 * 3600 * 1000
-        sem2EndMillis = System.currentTimeMillis() + 180L * 24 * 3600 * 1000
-
-        notificationsList.clear()
-        notificationsList.addAll(
-            listOf(
-                "🔔 Welcome to Tambala! 100% offline student upkeep tracker is active.",
-                "💡 Tip: Set your budget limits in the Budgets tab to monitor abrupt spending."
-            )
-        )
-
-        categories.clear()
-        categories.addAll(
-            listOf(
-                "Food & Dining",
-                "Rent & Hostel",
-                "Academic Printing",
-                "Transport",
-                "Airtime & Data",
-                "Project Costs",
-                "Emergencies"
-            )
-        )
-
-        transactions.clear()
-        val now = System.currentTimeMillis()
-        val currentMonth = SimpleDateFormat("MMMM", Locale.getDefault()).format(now)
-        transactions.addAll(
-            listOf(
-                TransactionData(1L, now, "Lunch", "Oct 15 • Food & Dining", "-MK 2,500", 2500.0, false, "Food & Dining", currentMonth, getCategoryIcon("Food & Dining")),
-                TransactionData(2L, now, "Photocopying Past Exams", "Oct 15 • Academic Printing", "-MK 300", 300.0, false, "Academic Printing", currentMonth, getCategoryIcon("Academic Printing")),
-                TransactionData(3L, now, "2GB Campus Data Bundle", "Oct 14 • Airtime & Data", "-MK 2,000", 2000.0, false, "Airtime & Data", currentMonth, getCategoryIcon("Airtime & Data")),
-                TransactionData(4L, now, "Allowance", "Oct 12 • Allowance", "+MK 50,000", 50000.0, true, "Allowance", currentMonth, getCategoryIcon("Allowance")),
-                TransactionData(5L, now, "Side Job", "Oct 10 • Grant", "+MK 10,000", 10000.0, true, "Grant", currentMonth, getCategoryIcon("Grant"))
-            )
-        )
-
-        budgets.clear()
-        budgets.addAll(
-            listOf(
-                BudgetData("Food & Groceries", "MK 2,500", 2500.0, "MK 20,000", 20000.0, "MK 17,500 left", 0.125f, "MK 333/day", getCategoryIcon("Food & Groceries")),
-                BudgetData("Transport", "MK 0", 0.0, "MK 10,000", 10000.0, "MK 10,000 left", 0f, "MK 166/day", getCategoryIcon("Transport"))
-            )
-        )
-    }
-
-    private fun loadFromStorage() {
-        activeSemesterNumber = storage.getInt("activeSemesterNumber", 1)
-        sem1StartMillis = storage.getLong("sem1StartMillis", System.currentTimeMillis() - 60L * 24 * 3600 * 1000)
-        sem1EndMillis = storage.getLong("sem1EndMillis", System.currentTimeMillis() + 60L * 24 * 3600 * 1000)
-        sem2StartMillis = storage.getLong("sem2StartMillis", System.currentTimeMillis() + 61L * 24 * 3600 * 1000)
-        sem2EndMillis = storage.getLong("sem2EndMillis", System.currentTimeMillis() + 180L * 24 * 3600 * 1000)
-
-        monthlyLimit = storage.getDouble("monthlyLimit", 120000.0)
-        abruptNotificationEnabled = storage.getBoolean("abruptNotificationEnabled", true)
-        abruptThreshold = storage.getDouble("abruptThreshold", 10000.0)
-        selectedReportMonth = storage.getString("selectedReportMonth", SimpleDateFormat("MMMM", Locale.getDefault()).format(System.currentTimeMillis()))
-        analysisFilter = storage.getString("analysisFilter", "Semester")
-
-        val loadedCategories = storage.loadCategories()
-        categories.clear()
-        categories.addAll(loadedCategories)
-
-        val loadedNotifications = storage.loadNotifications()
-        notificationsList.clear()
-        notificationsList.addAll(loadedNotifications)
-
-        val loadedTxObjects = storage.loadTransactions()
-        transactions.clear()
-        for (obj in loadedTxObjects) {
-            val cat = obj.optString("category", "Other")
-            val isInc = obj.optBoolean("isIncome", false)
-            val tx = TransactionData(
-                id = obj.optLong("id", System.currentTimeMillis()),
-                timestamp = obj.optLong("timestamp", System.currentTimeMillis()),
-                title = obj.optString("title", ""),
-                subtitle = obj.optString("subtitle", ""),
-                amount = obj.optString("amount", "MK 0"),
-                rawAmount = obj.optDouble("rawAmount", 0.0),
-                isIncome = isInc,
-                category = cat,
-                monthTag = obj.optString("monthTag", selectedReportMonth),
-                icon = getCategoryIcon(cat)
-            )
-            transactions.add(tx)
-        }
-
-        val loadedBudgetObjects = storage.loadBudgets()
-        budgets.clear()
-        for (obj in loadedBudgetObjects) {
-            val title = obj.optString("title", "")
-            val limitVal = obj.optDouble("rawLimit", 0.0)
-            budgets.add(
-                BudgetData(
-                    title = title,
-                    spent = "MK 0",
-                    rawSpent = 0.0,
-                    limit = "MK %,d".format(limitVal.toInt()),
-                    rawLimit = limitVal,
-                    remaining = "MK %,d left".format(limitVal.toInt()),
-                    progress = 0f,
-                    targetPerDay = "MK 0/day",
-                    icon = getCategoryIcon(title)
-                )
-            )
-        }
+        validationError = null
+        monthlyLimit = limitVal
+        return true
     }
 
     fun recalculateTotals() {
         rawIncome = transactions.filter { it.isIncome }.sumOf { it.rawAmount }
         rawExpenses = transactions.filter { !it.isIncome }.sumOf { it.rawAmount }
         rawBalance = rawIncome - rawExpenses
-
         totalIncome = "+MK %,d".format(rawIncome.toInt())
         totalExpenses = "-MK %,d".format(rawExpenses.toInt())
         balance = "MK %,d".format(rawBalance.toInt())
-
-        recalculateBudgets()
     }
 
-    fun recalculateBudgets() {
-        val remainingDays = daysLeft.coerceAtLeast(1)
-        for (budget in budgets) {
-            val totalSpentForCategory = transactions
-                .filter { !it.isIncome && it.category.equals(budget.title, ignoreCase = true) }
-                .sumOf { it.rawAmount }
+    // Analysis filter state ("Day", "Week", "Month", "Semester")
+    var analysisFilter by mutableStateOf("Semester")
 
-            budget.rawSpent = totalSpentForCategory
-            budget.spent = "MK %,d".format(budget.rawSpent.toInt())
-            budget.limit = "MK %,d".format(budget.rawLimit.toInt())
+    // Jan-Dec available months for past & present reporting
+    val availableMonths = listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+    var selectedReportMonth by mutableStateOf("November")
 
-            val rem = budget.rawLimit - budget.rawSpent
-            budget.remaining = if (rem >= 0) "MK %,d left".format(rem.toInt()) else "MK %,d over".format((-rem).toInt())
-            budget.progress = if (budget.rawLimit > 0) ((budget.rawSpent / budget.rawLimit).toFloat()).coerceIn(0f, 1f) else 0f
+    // Convenience methods for UI references
+    fun updateAnalysisFilter(filter: String) {
+        analysisFilter = filter
+    }
 
-            val dailyTarget = (budget.rawLimit / remainingDays).toInt()
-            budget.targetPerDay = "MK %,d/day".format(dailyTarget)
-        }
+    fun updateSelectedReportMonth(month: String) {
+        selectedReportMonth = month
+    }
+
+    fun deleteBudget(title: String) {
+        budgets.removeAll { it.title.equals(title, ignoreCase = true) }
+    }
+
+    val totalCategoryBudgetsRaw: Double
+        get() = budgets.sumOf { rawLimit -> rawLimit.rawLimit }
+
+    // Error state for validation matching Test Cases
+    var validationError by mutableStateOf<String?>(null)
+
+    // Unread notification state for TopNavBar bell badge
+    var hasUnreadNotifications by mutableStateOf(true)
+
+    // Notifications history list for Abrupt Spending and System alerts
+    val notificationsList = mutableStateListOf(
+        "🔔 Welcome to Tambala! 100% offline student upkeep tracker is active.",
+        "💡 Tip: Set your budget limits in the Budgets tab to monitor abrupt spending."
+    )
+
+    val transactions = mutableStateListOf(
+        TransactionData(1L, System.currentTimeMillis(), "Lunch", "Food & Dining", "-MK 2,500", 2500.0, false, "Food & Dining", "October", Icons.Default.Restaurant),
+        TransactionData(2L, System.currentTimeMillis(), "Photocopying Past Exams", "Academic Printing", "-MK 300", 300.0, false, "Academic Printing", "October", Icons.Default.Print),
+        TransactionData(3L, System.currentTimeMillis(), "2GB Campus Data Bundle", "Airtime & Data", "-MK 2,000", 2000.0, false, "Airtime & Data", "October", Icons.Default.Wifi),
+        TransactionData(4L, System.currentTimeMillis(), "Allowance", "Allowance", "+MK 50,000", 50000.0, true, "Allowance", "October", Icons.Default.Restaurant),
+        TransactionData(5L, System.currentTimeMillis(), "Side Job", "Grant", "+MK 10,000", 10000.0, true, "Grant", "October", Icons.Default.Restaurant)
+    )
+
+    val budgets = mutableStateListOf(
+        BudgetData("Food & Groceries", "MK 2,500", 2500.0, "MK 20,000", 20000.0, "MK 17,500 left", 0.125f, "MK 666/day", Icons.Default.Restaurant),
+        BudgetData("Transport", "MK 0", 0.0, "MK 10,000", 10000.0, "MK 10,000 left", 0f, "MK 333/day", Icons.Default.DirectionsBus)
+    )
+
+    val categories = mutableStateListOf(
+        "Food & Dining",
+        "Rent & Hostel",
+        "Academic Printing",
+        "Transport",
+        "Airtime & Data",
+        "Project Costs",
+        "Emergencies"
+    )
+
+    var abruptAlertMessage by mutableStateOf<String?>(null)
+
+    fun cacheFinancialState(context: Context) {
+        val prefs = context.getSharedPreferences("tambala_prefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("balance_cache", balance)
+            .putString("income_cache", totalIncome)
+            .putString("expenses_cache", totalExpenses)
+            .putFloat("current_balance_cache", rawBalance.toFloat())
+            .apply()
     }
 
     fun addNotification(msg: String) {
         notificationsList.add(0, msg)
-        saveData()
+        hasUnreadNotifications = true
     }
 
     private fun formatDate(millis: Long): String {
@@ -321,8 +186,7 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
         } else {
             sem2StartMillis = millis
         }
-        recalculateBudgets()
-        saveData()
+        recalculateDaysLeft()
     }
 
     fun updateEndDate(millis: Long) {
@@ -330,38 +194,19 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
             validationError = "End date cannot be in the past. Please choose a future date."
             return
         }
-        validationError = null
         if (activeSemesterNumber == 1) {
             sem1EndMillis = millis
         } else {
             sem2EndMillis = millis
         }
-        recalculateBudgets()
-        saveData()
+        recalculateDaysLeft()
     }
 
-    fun updateActiveSemester(semNum: Int) {
-        activeSemesterNumber = semNum
-        recalculateBudgets()
-        saveData()
-    }
-
-    fun updateAbruptAlerts(enabled: Boolean, threshold: Double? = null) {
-        abruptNotificationEnabled = enabled
-        if (threshold != null && threshold > 0) {
-            abruptThreshold = threshold
-        }
-        saveData()
-    }
-
-    fun updateAnalysisFilter(filter: String) {
-        analysisFilter = filter
-        saveData()
-    }
-
-    fun updateSelectedReportMonth(month: String) {
-        selectedReportMonth = month
-        saveData()
+    private fun recalculateDaysLeft() {
+        val end = if (activeSemesterNumber == 1) sem1EndMillis else sem2EndMillis
+        val diff = end - System.currentTimeMillis()
+        val calculated = (diff / (1000 * 60 * 60 * 24)).toInt()
+        daysLeft = calculated.coerceAtLeast(1)
     }
 
     fun addTransaction(title: String, amountStr: String, isIncome: Boolean, category: String, dateMillis: Long, dateStr: String): Boolean {
@@ -381,16 +226,17 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
 
         validationError = null
         val formattedAmount = if (isIncome) "+MK %,d".format(amountVal.toInt()) else "-MK %,d".format(amountVal.toInt())
-        val finalCategory = if (isIncome) {
-            if (category.isNotBlank() && category != "Food & Dining" && category != "General" && category != "Income") category else "Allowance"
-        } else {
-            if (category.isBlank()) "General" else category
+        val finalCategory = if (isIncome) "Income Source" else category
+        val icon = when (finalCategory) {
+            "Food & Dining" -> Icons.Default.Restaurant
+            "Academic Printing" -> Icons.Default.Print
+            "Transport" -> Icons.Default.DirectionsBus
+            "Airtime & Data" -> Icons.Default.Wifi
+            else -> Icons.Default.Restaurant
         }
-        val icon = getCategoryIcon(finalCategory)
 
         val subtitleStr = "$dateStr • $finalCategory"
-        val txMonthTag = SimpleDateFormat("MMMM", Locale.getDefault()).format(dateMillis)
-        transactions.add(0, TransactionData(System.currentTimeMillis(), dateMillis, title.ifBlank { finalCategory }, subtitleStr, formattedAmount, amountVal, isIncome, finalCategory, txMonthTag, icon))
+        transactions.add(0, TransactionData(System.currentTimeMillis(), dateMillis, title.ifBlank { finalCategory }, subtitleStr, formattedAmount, amountVal, isIncome, finalCategory, selectedReportMonth, icon))
 
         if (isIncome) {
             rawIncome += amountVal
@@ -404,14 +250,20 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
                 abruptAlertMessage = alertMsg
                 addNotification(alertMsg)
             }
+
+            val budget = budgets.find { it.title.equals(finalCategory, ignoreCase = true) }
+            if (budget != null) {
+                budget.rawSpent += amountVal
+                budget.spent = "MK %,d".format(budget.rawSpent.toInt())
+                val rem = budget.rawLimit - budget.rawSpent
+                budget.remaining = if (rem >= 0) "MK %,d left".format(rem.toInt()) else "MK %,d over".format((-rem).toInt())
+                budget.progress = ((budget.rawSpent / budget.rawLimit).toFloat()).coerceIn(0f, 1f)
+            }
         }
 
         totalIncome = "+MK %,d".format(rawIncome.toInt())
         totalExpenses = "-MK %,d".format(rawExpenses.toInt())
         balance = "MK %,d".format(rawBalance.toInt())
-
-        recalculateBudgets()
-        saveData()
         return true
     }
 
@@ -435,6 +287,15 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
             } else {
                 rawExpenses -= tx.rawAmount
                 rawBalance += tx.rawAmount
+
+                val budget = budgets.find { it.title.equals(tx.category, ignoreCase = true) }
+                if (budget != null) {
+                    budget.rawSpent = (budget.rawSpent - tx.rawAmount).coerceAtLeast(0.0)
+                    budget.spent = "MK %,d".format(budget.rawSpent.toInt())
+                    val rem = budget.rawLimit - budget.rawSpent
+                    budget.remaining = if (rem >= 0) "MK %,d left".format(rem.toInt()) else "MK %,d over".format((-rem).toInt())
+                    budget.progress = if (budget.rawLimit > 0) ((budget.rawSpent / budget.rawLimit).toFloat()).coerceIn(0f, 1f) else 0f
+                }
             }
 
             val formattedAmount = if (tx.isIncome) "+MK %,d".format(newAmt.toInt()) else "-MK %,d".format(newAmt.toInt())
@@ -454,14 +315,20 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
                     abruptAlertMessage = alertMsg
                     addNotification(alertMsg)
                 }
+
+                val budget = budgets.find { it.title.equals(tx.category, ignoreCase = true) }
+                if (budget != null) {
+                    budget.rawSpent += newAmt
+                    budget.spent = "MK %,d".format(budget.rawSpent.toInt())
+                    val rem = budget.rawLimit - budget.rawSpent
+                    budget.remaining = if (rem >= 0) "MK %,d left".format(rem.toInt()) else "MK %,d over".format((-rem).toInt())
+                    budget.progress = ((budget.rawSpent / budget.rawLimit).toFloat()).coerceIn(0f, 1f)
+                }
             }
 
             totalIncome = "+MK %,d".format(rawIncome.toInt())
             totalExpenses = "-MK %,d".format(rawExpenses.toInt())
             balance = "MK %,d".format(rawBalance.toInt())
-
-            recalculateBudgets()
-            saveData()
             return true
         }
         return false
@@ -471,69 +338,67 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
         val tx = transactions.find { it.id == id }
         if (tx != null) {
             if (tx.isIncome) {
-                rawIncome -= tx.rawAmount
-                rawBalance -= tx.rawAmount
+                rawIncome = (rawIncome - tx.rawAmount).coerceAtLeast(0.0)
+                rawBalance = rawBalance - tx.rawAmount
             } else {
-                rawExpenses -= tx.rawAmount
-                rawBalance += tx.rawAmount
+                rawExpenses = (rawExpenses - tx.rawAmount).coerceAtLeast(0.0)
+                rawBalance = rawBalance + tx.rawAmount
+
+                val budget = budgets.find { it.title.equals(tx.category, ignoreCase = true) }
+                if (budget != null) {
+                    budget.rawSpent = (budget.rawSpent - tx.rawAmount).coerceAtLeast(0.0)
+                    budget.spent = "MK %,d".format(budget.rawSpent.toInt())
+                    val rem = budget.rawLimit - budget.rawSpent
+                    budget.remaining = if (rem >= 0) "MK %,d left".format(rem.toInt()) else "MK %,d over".format((-rem).toInt())
+                    budget.progress = if (budget.rawLimit > 0) ((budget.rawSpent / budget.rawLimit).toFloat()).coerceIn(0f, 1f) else 0f
+                }
             }
             totalIncome = "+MK %,d".format(rawIncome.toInt())
             totalExpenses = "-MK %,d".format(rawExpenses.toInt())
             balance = "MK %,d".format(rawBalance.toInt())
-
             transactions.remove(tx)
-            recalculateBudgets()
-            saveData()
         }
     }
 
     fun addCategory(categoryName: String): Boolean {
-        val trimmed = categoryName.trim()
-        if (trimmed.isBlank()) {
+        if (categoryName.isBlank()) {
             validationError = "Category name cannot be empty"
             return false
         }
-        if (categories.any { it.equals(trimmed, ignoreCase = true) }) {
+        if (categories.contains(categoryName)) {
             validationError = "Category already exists"
             return false
         }
         validationError = null
-        categories.add(trimmed)
-        saveData()
+        categories.add(categoryName)
         return true
     }
 
     fun editCategory(oldName: String, newName: String): Boolean {
-        val trimmed = newName.trim()
-        if (trimmed.isBlank()) {
+        if (newName.isBlank()) {
             validationError = "Category name cannot be empty"
             return false
         }
-        val index = categories.indexOfFirst { it.equals(oldName, ignoreCase = true) }
+        val index = categories.indexOf(oldName)
         if (index != -1) {
-            categories[index] = trimmed
-
+            validationError = null
+            categories[index] = newName
             val budget = budgets.find { it.title.equals(oldName, ignoreCase = true) }
             if (budget != null) {
                 val idx = budgets.indexOf(budget)
-                budgets[idx] = budget.copy(title = trimmed)
+                budgets[idx] = budget.copy(title = newName)
             }
-
-            recalculateBudgets()
-            saveData()
             return true
         }
         return false
     }
 
     fun deleteCategory(categoryName: String) {
-        categories.removeAll { it.equals(categoryName, ignoreCase = true) }
-        val budget = budgets.find { it.title.equals(categoryName, ignoreCase = true) }
-        if (budget != null) {
-            budgets.remove(budget)
+        categories.remove(categoryName)
+        val b = budgets.find { it.title.equals(categoryName, ignoreCase = true) }
+        if (b != null) {
+            budgets.remove(b)
         }
-        recalculateBudgets()
-        saveData()
     }
 
     fun setBudgetLimit(categoryName: String, limitStr: String): Boolean {
@@ -555,6 +420,10 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
         val existing = budgets.find { it.title.equals(categoryName, ignoreCase = true) }
         if (existing != null) {
             existing.rawLimit = limitVal
+            existing.limit = "MK %,d".format(limitVal.toInt())
+            val rem = existing.rawLimit - existing.rawSpent
+            existing.remaining = if (rem >= 0) "MK %,d left".format(rem.toInt()) else "MK %,d over".format((-rem).toInt())
+            existing.progress = ((existing.rawSpent / existing.rawLimit).toFloat()).coerceIn(0f, 1f)
         } else {
             budgets.add(
                 BudgetData(
@@ -565,67 +434,19 @@ class FinanceViewModel(context: Context? = null) : ViewModel() {
                     rawLimit = limitVal,
                     remaining = "MK %,d left".format(limitVal.toInt()),
                     progress = 0f,
-                    targetPerDay = "MK 0/day",
-                    icon = getCategoryIcon(categoryName)
+                    targetPerDay = "MK %,d/day".format((limitVal / 30).toInt()),
+                    icon = Icons.Default.Restaurant
                 )
             )
         }
-
-        recalculateBudgets()
-        saveData()
         return true
     }
 
-    val totalCategoryBudgetsRaw: Double
-        get() = budgets.sumOf { it.rawLimit }
-
-    fun updateMonthlyLimit(limitStr: String): Boolean {
-        if (limitStr.isBlank()) {
-            validationError = "Monthly allocation is required"
-            return false
-        }
-        val amountVal = limitStr.toDoubleOrNull()
-        if (amountVal == null) {
-            validationError = "Enter a valid monthly allocation"
-            return false
-        }
-        if (amountVal <= 0.0) {
-            validationError = "Enter an allocation greater than 0"
-            return false
-        }
-
-        validationError = null
-        monthlyLimit = amountVal
-        saveData()
-        return true
-    }
-
-    fun deleteBudget(categoryName: String) {
-        val budget = budgets.find { it.title.equals(categoryName, ignoreCase = true) }
-        if (budget != null) {
-            budgets.remove(budget)
-            recalculateBudgets()
-            saveData()
-        }
-    }
-
-    // Dynamic filtering for Day, Week, Month (Jan-Dec), Semester 1 & Semester 2 based on start/end date range
     val filteredTransactions: List<TransactionData>
         get() {
-            val now = System.currentTimeMillis()
             return when (analysisFilter) {
-                "Day" -> {
-                    val calNow = Calendar.getInstance().apply { timeInMillis = now }
-                    transactions.filter { tx ->
-                        val calTx = Calendar.getInstance().apply { timeInMillis = tx.timestamp }
-                        calNow.get(Calendar.YEAR) == calTx.get(Calendar.YEAR) &&
-                        calNow.get(Calendar.DAY_OF_YEAR) == calTx.get(Calendar.DAY_OF_YEAR)
-                    }
-                }
-                "Week" -> {
-                    val sevenDaysAgo = now - 7L * 24 * 3600 * 1000
-                    transactions.filter { tx -> tx.timestamp in sevenDaysAgo..now }
-                }
+                "Day" -> transactions.take(1)
+                "Week" -> transactions.take(3)
                 "Month" -> transactions.filter { it.monthTag.equals(selectedReportMonth, ignoreCase = true) }
                 "Semester" -> {
                     val start = if (activeSemesterNumber == 1) sem1StartMillis else sem2StartMillis
